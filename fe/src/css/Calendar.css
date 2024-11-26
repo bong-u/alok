@@ -40,6 +40,10 @@
 	align-items: center;
 }
 
+.react-calendar__tile:hover {
+	background-color: #e6e6e6 !important;
+}
+
 .react-calendar__tile--active {
 	color: black !important;
 	background-color: inherit !important;
