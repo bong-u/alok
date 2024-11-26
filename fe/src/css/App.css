@@ -1,0 +1,26 @@
+@import "https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css";
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	overflow: hidden;
+}
+
+.App {
+	height: 100vh;
+}
+
+.box {
+	max-width: 400px;
+}
+
+.wide {
+	padding-left: 0;
+	padding-right: 0;
+}
+
+.grecaptcha-badge {
+	visibility: hidden;
+}

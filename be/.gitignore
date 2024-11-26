@@ -1,0 +1,12 @@
+DS_Store
+node_modules/
+.env
+.env.test
+migrations/
+src/**/*.js
+src/insert.ts
+
+# Database
+test.db
+db.sqlite3
+db.sqlite3-journal

@@ -1,0 +1,31 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  createdAt DateTime @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  records   Record[]
+}
+
+model Record {
+  date       String
+  recordType String   @map("record_type")
+  amount     Float
+  userId     Int      @map("user_id")
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([date, recordType, userId])
+}
+
