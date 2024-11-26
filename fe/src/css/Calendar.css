@@ -14,19 +14,20 @@
 
 .react-calendar__navigation {
 	height: 37px;
-	align-items: flex-start;
-	margin: 0;
 }
 
+.react-calendar__navigation__arrow,
 .react-calendar__navigation__label {
-	font-size: 1.2rem;
+	background-color: inherit !important;
+	font-size: 1.3rem;
 }
 
-.react-calendar__navigation__label:focus {
-	font-weight: bold;
+.react-calendar__navigation__arrow:active {
+	font-size: 1rem;
 }
 
-.react-calendar__navigation__arrow {
+.react-calendar__navigation__prev2-button,
+.react-calendar__navigation__next2-button {
 	display: none;
 }
 

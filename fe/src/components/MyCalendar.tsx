@@ -40,7 +40,8 @@ const MyCalendar: React.FC<MyCalendarProps> = ({
 			activeStartDate={activeStartDate}
 			onActiveStartDateChange={onActiveStartDateChange}
 			showNavigation={showNavigation}
-			// tileDisabled={tileDisabled}
+			prevLabel="◀"
+			nextLabel="▶"
 		/>
 	);
 };
