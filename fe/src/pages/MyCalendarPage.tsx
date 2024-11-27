@@ -6,8 +6,10 @@ import { RecordType, RecordsByPeriod } from "../types";
 import api from "../api";
 
 const enum LastAction {
-	DRILL_DOWN = "drillDown",
+	PREV = "prev",
+	NEXT = "next",
 	DRILL_UP = "drillUp",
+	DRILL_DOWN = "drillDown",
 }
 
 const MyCalendarPage: React.FC = () => {
@@ -18,9 +20,13 @@ const MyCalendarPage: React.FC = () => {
 	const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
 	useEffect(() => {
-		if (lastAction === LastAction.DRILL_DOWN || lastAction === null) {
+		if (
+			lastAction === null ||
+			lastAction === LastAction.PREV ||
+			LastAction.DRILL_DOWN
+		) {
 			fetchRecordsByMonth(activeDate);
-		} else if (lastAction === LastAction.DRILL_UP) {
+		} else if (lastAction === LastAction.NEXT || LastAction.DRILL_UP) {
 			fetchRecordsByYear(activeDate);
 		}
 	}, [activeDate, lastAction]);
