@@ -16,16 +16,41 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   records   Record[]
+  attendees Attendee[]
 }
 
 model Record {
+  id         Int    @id @default(autoincrement())
   date       String
-  recordType String   @map("record_type")
+  recordType String @map("record_type")
   amount     Float
-  userId     Int      @map("user_id")
+  userId     Int    @map("user_id")
 
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Attendee       Attendee?        @relation(fields: [attendeeId], references: [id])
+  attendeeId     Int?
+  RecordAttendee RecordAttendee[]
 
-  @@id([date, recordType, userId])
+  @@unique([date, recordType, userId])
 }
 
+model Attendee {
+  id            Int    @id @default(autoincrement())
+  partnerUserId Int    @map("user_id")
+  name          String @unique
+
+  user User @relation(fields: [partnerUserId], references: [id], onDelete: Cascade)
+
+  joinedRecords  Record[]
+  RecordAttendee RecordAttendee[]
+}
+
+model RecordAttendee {
+  recordId   Int @map("record_id")
+  attendeeId Int @map("attendee_id")
+
+  record   Record   @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  attendee Attendee @relation(fields: [attendeeId], references: [id], onDelete: Cascade)
+
+  @@id([recordId, attendeeId])
+}

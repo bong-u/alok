@@ -13,6 +13,12 @@ interface UserResult {
 	plainPassword: string;
 }
 
+interface AttendeeResult {
+	id: number;
+	name: string;
+	partnerUserId: number;
+}
+
 const generateRandomString = (): string => {
 	return randomBytes(5).toString("hex");
 };
@@ -62,6 +68,18 @@ export const TestUtil = {
 				userId,
 			},
 		})) as DailyRecord;
+	},
+
+	async createAttendee(
+		attendeeName: string,
+		userId: number
+	): Promise<AttendeeResult> {
+		return (await prisma.attendee.create({
+			data: {
+				name: attendeeName,
+				partnerUserId: userId,
+			},
+		})) as AttendeeResult;
 	},
 };
 
