@@ -9,6 +9,7 @@ export interface BaseRecord {
 }
 
 export interface DailyRecord extends BaseRecord {
+	id: number;
 	date: string;
 }
 

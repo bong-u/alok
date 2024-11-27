@@ -8,6 +8,18 @@ import {
 const prisma = new PrismaClient();
 
 class RecordService {
+	static async getRecordById(
+		recordId: number,
+		userId: number
+	): Promise<DailyRecord | null> {
+		return (await prisma.record.findFirst({
+			where: {
+				id: recordId,
+				userId,
+			},
+		})) as DailyRecord | null;
+	}
+
 	static async getRecordsByMonth(
 		year: number,
 		month: number,
