@@ -38,14 +38,7 @@ describe("Record Router", () => {
 	describe("POST /api/records", () => {
 		it("중복된 데이터 - 409", async () => {
 			const user = await TestUtil.createUser();
-			await prisma.record.create({
-				data: {
-					date: "2024-01-01",
-					recordType: "soju",
-					amount: 3.5,
-					userId: user.id,
-				},
-			});
+			await TestUtil.createRecord("2024-01-01", "soju", 3.5, user.id);
 			const res = await request(app)
 				.post("/")
 				.send({
@@ -91,22 +84,9 @@ describe("Record Router", () => {
 		it("연별 데이터 조회 - 200", async () => {
 			const user1 = await TestUtil.createUser();
 			const user2 = await TestUtil.createUser();
-			await prisma.record.createMany({
-				data: [
-					{
-						date: "2024-01-01",
-						recordType: "soju",
-						amount: 3.5,
-						userId: user1.id,
-					},
-					{
-						date: "2024-01-02",
-						recordType: "soju",
-						amount: 3.5,
-						userId: user2.id,
-					},
-				],
-			});
+			await TestUtil.createRecord("2024-01-01", "soju", 3.5, user1.id);
+			await TestUtil.createRecord("2024-01-02", "soju", 3.5, user2.id);
+
 			const response = await request(app)
 				.get("/2024")
 				.set(
@@ -143,22 +123,9 @@ describe("Record Router", () => {
 		});
 		it("월별 데이터 조회 - 200", async () => {
 			const user = await TestUtil.createUser();
-			await prisma.record.createMany({
-				data: [
-					{
-						date: "2024-01-01",
-						recordType: "soju",
-						amount: 3.5,
-						userId: user.id,
-					},
-					{
-						date: "2024-01-02",
-						recordType: "soju",
-						amount: 3.5,
-						userId: user.id,
-					},
-				],
-			});
+			await TestUtil.createRecord("2024-01-01", "soju", 3.5, user.id);
+			await TestUtil.createRecord("2024-01-02", "soju", 3.5, user.id);
+
 			const response = await request(app)
 				.get("/2024/01")
 				.set(
@@ -201,22 +168,9 @@ describe("Record Router", () => {
 			const user1 = await TestUtil.createUser();
 			const user2 = await TestUtil.createUser();
 
-			await prisma.record.createMany({
-				data: [
-					{
-						date: "2024-01-01",
-						recordType: "soju",
-						amount: 3.5,
-						userId: user1.id,
-					},
-					{
-						date: "2024-01-02",
-						recordType: "soju",
-						amount: 2.5,
-						userId: user2.id,
-					},
-				],
-			});
+			await TestUtil.createRecord("2024-01-01", "soju", 3.5, user1.id);
+			await TestUtil.createRecord("2024-01-02", "soju", 2.5, user2.id);
+
 			const response = await request(app)
 				.get(`/2024/01/user/${user1.id}`)
 				.set(
@@ -233,14 +187,8 @@ describe("Record Router", () => {
 	describe("DELETE /api/records/:date/:recordType", () => {
 		it("DELETE - 200", async () => {
 			const user = await TestUtil.createUser();
-			await prisma.record.create({
-				data: {
-					date: "2024-01-01",
-					recordType: "soju",
-					amount: 3.5,
-					userId: user.id,
-				},
-			});
+			await TestUtil.createRecord("2024-01-01", "soju", 3.5, user.id);
+
 			const res = await request(app)
 				.delete("/2024-01-01/soju")
 				.set(

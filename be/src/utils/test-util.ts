@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { randomBytes } from "crypto";
+import { DailyRecord } from "../interfaces/record-interfaces";
 
 const prisma = new PrismaClient();
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS || "10");
@@ -45,6 +46,22 @@ export const TestUtil = {
 		hashedPassword: string
 	): Promise<boolean> {
 		return bcrypt.compare(password, hashedPassword);
+	},
+
+	async createRecord(
+		date: string,
+		recordType: string,
+		amount: number,
+		userId: number
+	): Promise<DailyRecord> {
+		return (await prisma.record.create({
+			data: {
+				date,
+				recordType,
+				amount,
+				userId,
+			},
+		})) as DailyRecord;
 	},
 };
 
