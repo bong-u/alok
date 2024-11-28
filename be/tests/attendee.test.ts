@@ -102,4 +102,85 @@ describe("Attendee Router", () => {
 			expect(res.body).toEqual(["김철수", "김영희"]);
 		});
 	});
+
+	describe("DELETE /api/attendees/:attendeeName?recordId=:recordId", () => {
+		it("참여자를 기록에서 삭제 - 200", async () => {
+			const user = await TestUtil.createUser();
+			const record = await TestUtil.createRecord(
+				"2024-01-01",
+				"soju",
+				1,
+				user.id
+			);
+			const attendee = await TestUtil.createAttendee("김철수", user.id);
+
+			await prisma.recordAttendee.create({
+				data: {
+					record: {
+						connect: { id: record.id },
+					},
+					attendee: {
+						connect: { id: attendee.id },
+					},
+				},
+			});
+
+			const res = await request(app)
+				.delete("/김철수")
+				.query({ recordId: record.id })
+				.set(
+					"Authorization",
+					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
+				);
+
+			expect(res.status).toBe(200);
+			expect(res.text).toBe("Attendee deleted successfully");
+
+			const recordAttendees = await prisma.recordAttendee.findMany({
+				where: { recordId: record.id },
+			});
+			expect(recordAttendees.length).toBe(0);
+
+			const dbAttendee = await prisma.attendee.findUnique({
+				where: { id: attendee.id },
+			});
+			expect(dbAttendee).toBeNull();
+		});
+
+		it("존재하지 않는 참여자 삭제 시도 - 404", async () => {
+			const user = await TestUtil.createUser();
+			const record = await TestUtil.createRecord(
+				"2024-01-01",
+				"soju",
+				1,
+				user.id
+			);
+
+			const res = await request(app)
+				.delete("/김영희")
+				.query({ recordId: record.id })
+				.set(
+					"Authorization",
+					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
+				);
+
+			expect(res.status).toBe(404);
+			expect(res.text).toBe("Attendee not found");
+		});
+
+		it("존재하지 않는 기록에서 삭제 시도 - 404", async () => {
+			const user = await TestUtil.createUser();
+
+			const res = await request(app)
+				.delete("/김철수")
+				.query({ recordId: 999 })
+				.set(
+					"Authorization",
+					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
+				);
+
+			expect(res.status).toBe(404);
+			expect(res.text).toBe("Record not found");
+		});
+	});
 });
