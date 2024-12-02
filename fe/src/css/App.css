@@ -24,3 +24,7 @@ body {
 .grecaptcha-badge {
 	visibility: hidden;
 }
+
+.ptr--text {
+	display: none !important; /* Pull-to-Refresh 텍스트 숨기기 */
+}

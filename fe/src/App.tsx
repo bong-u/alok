@@ -16,6 +16,7 @@ import AccountPage from "./pages/AccountPage";
 import ErrorPage from "./pages/ErrorPage";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import "./css/App.css";
+import { init, destroy } from "pulltorefreshjs";
 
 const Layout: React.FC = () => {
 	const offLineHandler = () => {
@@ -58,6 +59,23 @@ const Layout: React.FC = () => {
 };
 
 const App: React.FC = () => {
+	useEffect(() => {
+		init({
+			triggerElement: "body", // body에서 Pull-to-Refresh 감지
+			distThreshold: 70, // 끌어야 할 거리
+			instructionsPullToRefresh: "",
+			instructionsReleaseToRefresh: "",
+			instructionsRefreshing: "",
+			onRefresh: async () => {
+				window.location.reload();
+			},
+		});
+
+		return () => {
+			destroy(); // 컴포넌트가 언마운트되면 제거
+		};
+	}, []);
+
 	return (
 		<GoogleReCaptchaProvider
 			reCaptchaKey={process.env.REACT_APP_RECAPTCHA_SITE_KEY || ""}
