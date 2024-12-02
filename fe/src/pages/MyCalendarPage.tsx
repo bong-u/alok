@@ -23,10 +23,13 @@ const MyCalendarPage: React.FC = () => {
 		if (
 			lastAction === null ||
 			lastAction === LastAction.PREV ||
-			LastAction.DRILL_DOWN
+			lastAction === LastAction.DRILL_DOWN
 		) {
 			fetchRecordsByMonth(activeDate);
-		} else if (lastAction === LastAction.NEXT || LastAction.DRILL_UP) {
+		} else if (
+			lastAction === LastAction.NEXT ||
+			lastAction === LastAction.DRILL_UP
+		) {
 			fetchRecordsByYear(activeDate);
 		}
 	}, [activeDate, lastAction]);
