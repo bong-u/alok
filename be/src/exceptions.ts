@@ -21,6 +21,12 @@ export class RecordNotFoundError extends Error {
 	}
 }
 
+export class DateNotFoundError extends Error {
+	constructor() {
+		super("Date not found");
+	}
+}
+
 export class RecaptchaScoreTooLowError extends Error {
 	constructor() {
 		super("Recaptcha score too low");

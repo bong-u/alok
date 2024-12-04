@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { DateNotFoundError } from "../exceptions";
 
 const prisma = new PrismaClient();
 
@@ -10,16 +11,15 @@ class DateService {
 			},
 		});
 	}
-	static async getDateId(date: string): Promise<number | null> {
+
+	static async getDateId(date: string): Promise<number> {
 		const dateObj = await prisma.date.findUnique({
 			where: {
 				date,
 			},
 		});
 
-		if (!dateObj) {
-			return null;
-		}
+		if (!dateObj) throw new DateNotFoundError();
 
 		return dateObj.id;
 	}

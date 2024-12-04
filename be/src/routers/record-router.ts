@@ -9,7 +9,11 @@ import RecordService from "../services/record-service";
 import UserService from "../services/user-service";
 import DateService from "../services/date-service";
 import validationMiddleware from "../middlewares/validation-middleware";
-import { UserNotFoundError, RecordNotFoundError } from "../exceptions";
+import {
+	UserNotFoundError,
+	RecordNotFoundError,
+	DateNotFoundError,
+} from "../exceptions";
 
 const recordRouter = () => {
 	const router = Router();
@@ -84,6 +88,7 @@ const recordRouter = () => {
 		async (req: any, res: Response) => {
 			const { date, recordType } = req.body;
 			const userId = Number(req.userId);
+			let dateId: number = 0;
 			try {
 				await UserService.getUserById(req.userId);
 
@@ -94,10 +99,12 @@ const recordRouter = () => {
 					return;
 				}
 
-				let dateId = await DateService.getDateId(req.body.date);
-				// Date가 존재하지 않으면 Date를 생성
-				if (!dateId) {
-					dateId = (await DateService.createDate(req.body.date)).id;
+				try {
+					dateId = await DateService.getDateId(date);
+				} catch (err: any) {
+					if (err instanceof DateNotFoundError) {
+						dateId = (await DateService.createDate(date)).id;
+					}
 				}
 
 				const record = req.body as DailyRecord;
