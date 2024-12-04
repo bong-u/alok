@@ -27,13 +27,17 @@ const attendeeRouter = () => {
 					throw err;
 				}
 			}
-			const dateId = await DateService.getDateId(date);
+			const dateObj = await DateService.getDate(date, userId);
 
-			if (await AttendeeService.isAttended(attendee!.id, dateId)) {
-				res.status(409).send("Attendee already added");
+			if (dateObj.dateAttendees.length >= 5) {
+				res.status(403).send("5명 이상의 참여자를 추가할 수 없습니다.");
 				return;
 			}
-			await AttendeeService.connectAttendeeToDate(attendee!.id, dateId);
+			if (await AttendeeService.isAttended(attendee!.id, dateObj.id)) {
+				res.status(409).send("이미 추가된 참여자입니다.");
+				return;
+			}
+			await AttendeeService.connectAttendeeToDate(attendee!.id, dateObj.id);
 			res.status(200).send("Attendee added successfully");
 		} catch (err: any) {
 			if (err instanceof DateNotFoundError) {

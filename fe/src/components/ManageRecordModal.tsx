@@ -89,6 +89,11 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 			console.info(response.data);
 		}
 		catch (error: any) {
+			// 403: 참여자 최대 인원 초과, 409: 이미 추가된 참여자
+			if (error.response.status === 403 || error.response.status === 409) {
+				alert(error.response.data);
+				return;
+			}
 			sessionStorage.setItem("error", error);
 			window.location.href = "/error";
 		}
