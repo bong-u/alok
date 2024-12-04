@@ -3,9 +3,6 @@ import jwtUtil from "../utils/jwt-util";
 import redis from "../redis";
 import { InvalidTokenError, TokenBlacklistedError } from "../exceptions";
 
-const REFRESH_TOKEN_EXPIRY_SECONDS =
-	Number(process.env.REFRESH_TOKEN_EXPIRY_SECONDS) || 60 * 60 * 24 * 7; // 7일
-
 class TokenService {
 	static generateAccessToken(userId: number): string {
 		return jwtUtil.generateAccessToken(userId);

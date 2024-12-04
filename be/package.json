@@ -5,8 +5,8 @@
 	"main": "src/index.ts",
 	"scripts": {
 		"build": "npx tsc",
-		"start": "npx tsc && NODE_ENV=prod node src/index.js",
-		"dev": "concurrently \"npx tsc --watch\" \"nodemon -q src/index.js\"",
+		"start": "npx tsc && NODE_ENV=prod node dist/index.js",
+		"dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
 		"test": "npx tsc && npx jest"
 	},
 	"author": "",

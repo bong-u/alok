@@ -4,7 +4,6 @@ import TokenService from "../services/token-service";
 import authMiddleware from "../middlewares/auth-middleware";
 import validationMiddleware from "../middlewares/validation-middleware";
 import {
-	UserResponse,
 	loginSchema,
 	refreshTokenSchema,
 	terminateTokenSchema,
@@ -39,7 +38,7 @@ const userRouter = () => {
 		}
 	});
 
-	router.get("/all", authMiddleware, async (req: any, res: Response) => {
+	router.get("/all", authMiddleware, async (_: any, res: Response) => {
 		try {
 			const users = await UserService.getAllUsers();
 			res.status(200).json(users);

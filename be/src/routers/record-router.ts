@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router, Response } from "express";
 import {
 	DailyRecord,
 	recordSchema,
@@ -58,7 +58,7 @@ const recordRouter = () => {
 			const userId = Number(req.params.userId);
 
 			try {
-				const user = await UserService.getUserById(userId);
+				await UserService.getUserById(userId);
 
 				const records = await RecordService.getRecordsByMonth(
 					year,
@@ -85,7 +85,7 @@ const recordRouter = () => {
 			const { date, recordType } = req.body;
 			const userId = Number(req.userId);
 			try {
-				const user = await UserService.getUserById(req.userId);
+				await UserService.getUserById(req.userId);
 
 				if (
 					await RecordService.isRecordExist(date, recordType, userId)
@@ -126,7 +126,6 @@ const recordRouter = () => {
 					recordType,
 					userId
 				);
-				const dateId = await DateService.getDateId(date);
 
 				RecordService.deleteRecordById(recordId);
 				res.status(200).send("Record deleted successfully");

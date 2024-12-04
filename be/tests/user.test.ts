@@ -253,7 +253,7 @@ describe("User Router", () => {
 		it("토큰 재발급", async () => {
 			const user = await TestUtil.createUser();
 
-			const accessToken = TokenService.generateAccessToken(user.id);
+			TokenService.generateAccessToken(user.id);
 			const refreshToken = TokenService.generateRefreshToken(user.id);
 
 			const response = await request(app)
