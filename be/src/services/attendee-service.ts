@@ -1,32 +1,22 @@
 import { PrismaClient } from "@prisma/client";
 import { AttendeeNotFoundError } from "../exceptions";
+import { AttendeeResponse } from "../interfaces/attendee-interfaces";
 
 const prisma = new PrismaClient();
-
-interface Attendee {
-	id: number;
-	name: string;
-	partnerUserId: number;
-}
-
-interface AttendeeResponse {
-	id: number;
-	name: string;
-}
-
-interface Record {
-	id: number;
-}
 
 class AttendeeService {
 	static async createAttendee(
 		name: string,
 		partnerUserId: number
-	): Promise<Attendee> {
+	): Promise<AttendeeResponse> {
 		return await prisma.attendee.create({
 			data: {
 				name,
 				partnerUserId,
+			},
+			select: {
+				id: true,
+				name: true,
 			},
 		});
 	}
@@ -46,11 +36,15 @@ class AttendeeService {
 	static async getAttendeeByName(
 		name: string,
 		partnerUserId: number
-	): Promise<Attendee> {
+	): Promise<AttendeeResponse> {
 		const attendee = await prisma.attendee.findFirst({
 			where: {
 				name,
 				partnerUserId,
+			},
+			select: {
+				id: true,
+				name: true,
 			},
 		});
 
@@ -107,19 +101,6 @@ class AttendeeService {
 		});
 
 		return !!dateAttendee;
-	}
-
-	static async getAttendedRecords(attendeeId: number): Promise<Record[]> {
-		const records = await prisma.record.findMany({
-			where: {
-				userId: attendeeId,
-			},
-			include: {
-				date: true,
-			},
-		});
-
-		return records;
 	}
 
 	static async deleteAttendee(attendeeId: number): Promise<void> {

@@ -8,3 +8,8 @@ export const recordIdSchema = Joi.object({
 	recordId: Joi.number().required(),
 });
 
+export interface AttendeeResponse {
+	id: number;
+	name: string;
+}
+
