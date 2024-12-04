@@ -105,8 +105,8 @@ const userRouter = () => {
 		async (req: Request, res: Response) => {
 			const { access_token, refresh_token } = req.body;
 			try {
-				await TokenService.addToBlacklist(access_token);
-				await TokenService.addToBlacklist(refresh_token);
+				TokenService.addToBlacklist(access_token);
+				TokenService.addToBlacklist(refresh_token);
 				res.status(204).send();
 			} catch (err: any) {
 				if (
@@ -133,7 +133,7 @@ const userRouter = () => {
 
 				res.status(200).json({
 					access_token:
-						await TokenService.generateAccessToken(userId),
+						TokenService.generateAccessToken(userId),
 				});
 			} catch (err: any) {
 				if (
@@ -179,9 +179,9 @@ const userRouter = () => {
 				req.body;
 
 			try {
+				TokenService.addToBlacklist(acessToken);
+				TokenService.addToBlacklist(refreshToken);
 				await UserService.getUserById(userId);
-				await TokenService.addToBlacklist(acessToken);
-				await TokenService.addToBlacklist(refreshToken);
 				await UserService.deleteUser(userId);
 				res.status(204).send();
 			} catch (err: any) {
