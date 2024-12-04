@@ -179,30 +179,28 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 							);
 						}
 					)}
+					{/* 구분선 */}
+					<hr />
 					{/* 참여자 추가 UI */}
-					<div className="field is-flex is-align-items-center is-justify-content-space-between">
-						<label className="label" style={{ flexShrink: 0 }}>
-							참여자
-						</label>
-						<div className="control mx-3 is-flex-grow-1">
-							<input
-								className="input"
-								type="text"
-								value={attendeeName}
-								onChange={(e) =>
-									setAttendeeName(e.target.value)
-								}
-								placeholder="참여자 이름"
-							/>
-						</div>
-						<div className="control">
-							<button
-								className="button is-primary"
-								onClick={handleAddAttendee}
-							>
-								추가
-							</button>
-						</div>
+					<label className="label" >
+						참여자
+					</label>
+					<div className="field is-flex is-align-items-center is-justify-content-space-between" style={{ gap: "1rem" }}>
+						<input
+							className="input"
+							type="text"
+							value={attendeeName}
+							onChange={(e) =>
+								setAttendeeName(e.target.value)
+							}
+							placeholder="참여자 이름"
+						/>
+						<button
+							className="button is-primary"
+							onClick={handleAddAttendee}
+						>
+							추가
+						</button>
 					</div>
 					{/* 참여자 목록 */}
 					<div className="tags">
