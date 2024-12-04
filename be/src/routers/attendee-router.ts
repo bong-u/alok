@@ -1,46 +1,54 @@
-import { Router, Request, Response } from "express";
+import { Router, Response } from "express";
 import AttendeeService from "../services/attendee-service";
-import RecordService from "../services/record-service";
-import validationMiddleware from "../middlewares/validation-middleware";
+import DateService from "../services/date-service";
+import { DateNotFoundError, AttendeeNotFoundError } from "../exceptions";
 
 const attendeeRouter = () => {
 	const router = Router();
 
-	router.post("/:attendeeName", async (req: any, res: Response) => {
-		const { attendeeName } = req.params;
-		const recordId = Number(req.query.recordId);
-
-		const record = await RecordService.getRecordById(recordId, req.userId);
-
-		if (!record) {
-			res.status(404).send("Record not found");
-			return;
-		}
+	router.post("/:date/:attendeeName", async (req: any, res: Response) => {
+		const { date, attendeeName } = req.params;
+		const userId = Number(req.userId);
 
 		try {
-			let attendee = await AttendeeService.getAttendeeByName(
-				attendeeName,
-				req.userId
-			);
-
-			if (!attendee) {
-				attendee = await AttendeeService.createAttendee(
+			let attendee;
+			try {
+				attendee = await AttendeeService.getAttendeeByName(
 					attendeeName,
-					req.userId
+					userId
 				);
+			} catch (err: any) {
+				if (err instanceof AttendeeNotFoundError) {
+					attendee = await AttendeeService.createAttendee(
+						attendeeName,
+						userId
+					);
+				} else {
+					throw err;
+				}
 			}
+			const dateId = await DateService.getDateId(date);
 
-			await AttendeeService.addAttendeeToRecord(attendee.id, record.id);
+			if (await AttendeeService.isAttended(attendee!.id, dateId)) {
+				res.status(409).send("Attendee already added");
+				return;
+			}
+			await AttendeeService.connectAttendeeToDate(attendee!.id, dateId);
 			res.status(200).send("Attendee added successfully");
 		} catch (err: any) {
+			if (err instanceof DateNotFoundError) {
+				res.status(404).send(err.message);
+				return;
+			}
 			console.error(err);
 			res.status(500).send(err.message);
 		}
 	});
 
 	router.get("/", async (req: any, res: Response) => {
+		const userId = Number(req.userId);
 		try {
-			const attendees = await AttendeeService.getFriendNames(req.userId);
+			const attendees = await AttendeeService.getFriends(userId);
 			res.status(200).send(attendees);
 		} catch (err: any) {
 			console.error(err);
@@ -48,43 +56,53 @@ const attendeeRouter = () => {
 		}
 	});
 
-	router.delete("/:attendeeName", async (req: any, res: Response) => {
-		const { attendeeName } = req.params;
-		const recordId = Number(req.query.recordId);
+	router.get("/:date", async (req: any, res: Response) => {
+		const { date } = req.params;
+		const userId = Number(req.userId);
+
 		try {
-			const record = await RecordService.getRecordById(
-				recordId,
-				req.userId
+			const dateId = await DateService.getDateId(date);
+			const attendees = await AttendeeService.getAttendeesByDateId(
+				dateId,
+				userId
 			);
-			if (!record) {
-				res.status(404).send("Record not found");
-				return;
-			}
-
-			const attendee = (
-				await AttendeeService.getAttendeesByRecordId(recordId)
-			).find((attendee) => attendee.name === attendeeName);
-
-			if (!attendee) {
-				res.status(404).send("Attendee not found");
-				return;
-			}
-
-			// 삭제 후에 다른 record와 관계가 있는 경우
-			if (
-				(await AttendeeService.getAttendedRecords(attendee.id)).length >
-				1
-			) {
-				await AttendeeService.deleteAttendeeInRecord(
-					attendee.id,
-					record.id
-				);
-			} else {
-				await AttendeeService.deleteAttendee(attendee.id);
-			}
-
-			res.status(200).send("Attendee deleted successfully");
+			res.status(200).send(attendees);
 		} catch (err: any) {
+			if (err instanceof DateNotFoundError) {
+				res.status(404).send(err.message);
+				return;
+			}
+			console.error(err);
+			res.status(500).send(err.message)
+		}
+	});
+
+	router.delete("/:date/:attendeeName", async (req: any, res: Response) => {
+		const { date, attendeeName } = req.params;
+		const userId = Number(req.userId);
+
+		try {
+			const attendee = await AttendeeService.getAttendeeByName(
+				attendeeName,
+				userId
+			);
+			const dateId = await DateService.getDateId(date);
+
+			if (await AttendeeService.isAttended(dateId, attendee.id)) {
+				throw new AttendeeNotFoundError();
+			}
+
+			await AttendeeService.deleteAttendee(attendee.id);
+			res.status(200).send("Attendee removed successfully");
+		} catch (err: any) {
+			if (err instanceof DateNotFoundError) {
+				res.status(404).send(err.message);
+				return;
+			}
+			if (err instanceof AttendeeNotFoundError) {
+				res.status(404).send(err.message);
+				return;
+			}
 			console.error(err);
 			res.status(500).send(err.message);
 		}

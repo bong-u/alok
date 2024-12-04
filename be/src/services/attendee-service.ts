@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { AttendeeNotFoundError } from "../exceptions";
 
 const prisma = new PrismaClient();
 
@@ -7,6 +8,12 @@ interface Attendee {
 	name: string;
 	partnerUserId: number;
 }
+
+interface AttendeeResponse {
+	id: number;
+	name: string;
+}
+
 interface Record {
 	id: number;
 }
@@ -19,11 +26,19 @@ class AttendeeService {
 		return await prisma.attendee.create({
 			data: {
 				name,
-				user: {
-					connect: {
-						id: partnerUserId,
-					},
-				},
+				partnerUserId,
+			},
+		});
+	}
+
+	static async connectAttendeeToDate(
+		attendeeId: number,
+		dateId: number
+	): Promise<void> {
+		await prisma.dateAttendee.create({
+			data: {
+				dateId,
+				attendeeId,
 			},
 		});
 	}
@@ -31,84 +46,80 @@ class AttendeeService {
 	static async getAttendeeByName(
 		name: string,
 		partnerUserId: number
-	): Promise<Attendee | null> {
-		return await prisma.attendee.findFirst({
+	): Promise<Attendee> {
+		const attendee = await prisma.attendee.findFirst({
 			where: {
 				name,
 				partnerUserId,
 			},
 		});
+
+		if (!attendee) throw new AttendeeNotFoundError();
+
+		return attendee;
 	}
 
-	static async getFriendNames(partnerUserId: number): Promise<string[]> {
+	static async getFriends(
+		partnerUserId: number
+	): Promise<AttendeeResponse[]> {
 		const attendees = await prisma.attendee.findMany({
 			where: {
 				partnerUserId,
 			},
-		});
-		return attendees.map((attendee) => attendee.name);
-	}
-
-	static async getAttendeesByRecordId(recordId: number): Promise<Attendee[]> {
-		const recordAttendees = await prisma.recordAttendee.findMany({
-			where: {
-				recordId: recordId,
-			},
 			select: {
-				attendee: {
-					select: {
-						id: true,
-						name: true,
-						partnerUserId: true,
+				id: true,
+				name: true,
+			},
+		});
+		return attendees;
+	}
+	static async getAttendeesByDateId(
+		dateId: number,
+		partnerUserId: number
+	): Promise<AttendeeResponse[]> {
+		const attendees = await prisma.attendee.findMany({
+			where: {
+				partnerUserId,
+				dateAttendees: {
+					some: {
+						dateId,
 					},
 				},
 			},
+			select: {
+				id: true,
+				name: true,
+			},
 		});
 
-		return recordAttendees.map((recordAttendee) => recordAttendee.attendee);
+		return attendees;
+	}
+
+	static async isAttended(
+		attendeeId: number,
+		dateId: number
+	): Promise<boolean> {
+		const dateAttendee = await prisma.dateAttendee.findFirst({
+			where: {
+				attendeeId,
+				dateId,
+			},
+		});
+
+		return !!dateAttendee;
 	}
 
 	static async getAttendedRecords(attendeeId: number): Promise<Record[]> {
-		const recordAttendees = await prisma.recordAttendee.findMany({
+		const records = await prisma.record.findMany({
 			where: {
-				attendeeId,
+				userId: attendeeId,
 			},
-			select: {
-				record: {
-					select: {
-						id: true,
-					},
-				},
+			include: {
+				date: true,
 			},
 		});
 
-		return recordAttendees.map((recordAttendee) => recordAttendee.record);
-	}
-
-	static async addAttendeeToRecord(
-		attendeeId: number,
-		recordId: number
-	): Promise<void> {
-		await prisma.recordAttendee.create({
-			data: {
-				attendeeId,
-				recordId,
-			},
-		});
-	}
-
-	static async deleteAttendeeInRecord(
-		attendeeId: number,
-		recordId: number
-	): Promise<void> {
-		await prisma.recordAttendee.delete({
-			where: {
-				recordId_attendeeId: {
-					attendeeId,
-					recordId,
-				},
-			},
-		});
+		return records;
 	}
 
 	static async deleteAttendee(attendeeId: number): Promise<void> {

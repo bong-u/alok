@@ -88,6 +88,18 @@ export const TestUtil = {
 			},
 		})) as AttendeeResult;
 	},
+
+	async connectAttendeeToDate(
+		attendeeId: number,
+		dateId: number
+	): Promise<any> {
+		return await prisma.dateAttendee.create({
+			data: {
+				dateId,
+				attendeeId,
+			},
+		});
+	},
 };
 
 export default TestUtil;

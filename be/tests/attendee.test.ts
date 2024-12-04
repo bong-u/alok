@@ -1,14 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import authMiddleware from "../src/middlewares/auth-middleware";
 import express from "express";
-import {
-	describe,
-	beforeAll,
-	beforeEach,
-	afterAll,
-	it,
-	expect,
-} from "@jest/globals";
+import { describe, beforeEach, afterAll, it, expect } from "@jest/globals";
 import request from "supertest";
 import attendeeRouter from "../src/routers/attendee-router";
 import redis from "../src/redis";
@@ -27,6 +20,7 @@ describe("Attendee Router", () => {
 	});
 
 	beforeEach(async () => {
+		await prisma.date.deleteMany();
 		await prisma.attendee.deleteMany();
 	});
 
@@ -34,153 +28,140 @@ describe("Attendee Router", () => {
 		await redis.quit();
 	});
 
-	describe("POST /api/attendees/:attendeeName?recordId=:recordId", () => {
-		it("새로운 참여자 추가 - 200", async () => {
+	describe("POST /api/attendees/:date/:attendeeName", () => {
+		it("참여자 추가 (기록이 있는 참여자)- 200", async () => {
 			const user = await TestUtil.createUser();
-			const record = await TestUtil.createRecord(
-				"2024-01-01",
-				"soju",
-				1,
-				user.id
-			);
+			await TestUtil.createAttendee("김철수", user.id);
+			await TestUtil.createDate("2024-01-01");
 
-			const res = await request(app)
-				.post("/김철수")
-				.query({ recordId: record.id })
+			const response = await request(app)
+				.post("/2024-01-01/김철수")
 				.set(
 					"Authorization",
 					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
 				);
 
-			expect(res.status).toBe(200);
+			expect(response.status).toBe(200);
 		});
-		it("이미 존재하는 참여자 추가 - 400", async () => {
-			const user = await TestUtil.createUser();
-			const record = await TestUtil.createRecord(
-				"2024-01-01",
-				"soju",
-				1,
-				user.id
-			);
-			await prisma.attendee.create({
-				data: {
-					name: "김철수",
-					user: {
-						connect: {
-							id: user.id,
-						},
-					},
-				},
-			});
 
-			const res = await request(app)
-				.post("/김철수")
-				.query({ recordId: record.id })
+		it("참여자 추가 (신규 참여자)- 200", async () => {
+			const user = await TestUtil.createUser();
+			await TestUtil.createDate("2024-01-01");
+
+			const response = await request(app)
+				.post("/2024-01-01/김철수")
 				.set(
 					"Authorization",
 					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
 				);
+			expect(response.status).toBe(200);
+		});
 
-			expect(res.status).toBe(200);
+		it("이미 추가된 참여자 추가 시도 - 409", async () => {
+			const user = await TestUtil.createUser();
+			const attendee = await TestUtil.createAttendee("김철수", user.id);
+			const date = await TestUtil.createDate("2024-01-01");
+			await TestUtil.connectAttendeeToDate(attendee.id, date.id);
+
+			const response = await request(app)
+				.post("/2024-01-01/김철수")
+				.set(
+					"Authorization",
+					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
+				);
+			expect(response.status).toBe(409);
+		});
+
+		it("date가 없는 경우 - 404", async () => {
+			const user = await TestUtil.createUser();
+
+			const response = await request(app)
+				.post("/2024-01-01/김철수")
+				.set(
+					"Authorization",
+					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
+				);
+			expect(response.status).toBe(404);
 		});
 	});
 
-	describe("GET /api/attendees", () => {
-		it("등록된 참여자 목록 조회 - 200", async () => {
+	describe("GET /api/attendees/", () => {
+		it("친구 목록 조회 - 200", async () => {
 			const user = await TestUtil.createUser();
 			const attendee1 = await TestUtil.createAttendee("김철수", user.id);
 			const attendee2 = await TestUtil.createAttendee("김영희", user.id);
+			const date = await TestUtil.createDate("2024-01-01");
 
-			const res = await request(app)
+			await TestUtil.connectAttendeeToDate(attendee1.id, date.id);
+			await TestUtil.connectAttendeeToDate(attendee2.id, date.id);
+
+			const response = await request(app)
 				.get("/")
 				.set(
 					"Authorization",
 					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
 				);
 
-			expect(res.status).toBe(200);
-			expect(res.body).toEqual(["김철수", "김영희"]);
+			expect(response.status).toBe(200);
+			expect(response.body).toEqual([
+				{ id: attendee1.id, name: attendee1.name },
+				{ id: attendee2.id, name: attendee2.name },
+			]);
 		});
 	});
 
-	describe("DELETE /api/attendees/:attendeeName?recordId=:recordId", () => {
-		it("참여자를 기록에서 삭제 - 200", async () => {
+	describe("GET /api/attendees/:date", () => {
+		it("특정 날짜의 참여자 목록 조회 - 200", async () => {
 			const user = await TestUtil.createUser();
-			const record = await TestUtil.createRecord(
-				"2024-01-01",
-				"soju",
-				1,
-				user.id
-			);
-			const attendee = await TestUtil.createAttendee("김철수", user.id);
+			const attendee1 = await TestUtil.createAttendee("김철수", user.id);
+			const attendee2 = await TestUtil.createAttendee("김영희", user.id);
+			const date = await TestUtil.createDate("2024-01-01");
 
-			await prisma.recordAttendee.create({
-				data: {
-					record: {
-						connect: { id: record.id },
-					},
-					attendee: {
-						connect: { id: attendee.id },
-					},
-				},
-			});
+			await TestUtil.connectAttendeeToDate(attendee1.id, date.id);
+			await TestUtil.connectAttendeeToDate(attendee2.id, date.id);
 
-			const res = await request(app)
-				.delete("/김철수")
-				.query({ recordId: record.id })
+			const response = await request(app)
+				.get("/2024-01-01")
 				.set(
 					"Authorization",
 					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
 				);
 
-			expect(res.status).toBe(200);
-			expect(res.text).toBe("Attendee deleted successfully");
+			expect(response.status).toBe(200);
+			expect(response.body).toEqual([
+				{ id: attendee1.id, name: attendee1.name },
+				{ id: attendee2.id, name: attendee2.name },
+			]);
+		});
+	});
 
-			const recordAttendees = await prisma.recordAttendee.findMany({
-				where: { recordId: record.id },
-			});
-			expect(recordAttendees.length).toBe(0);
+	describe("DELETE /api/attendees/:date/:attendeeName", () => {
+		it("참여자 삭제 - 200", async () => {
+			const user = await TestUtil.createUser();
+			const attendee = await TestUtil.createAttendee("김철수", user.id);
+			const date = await TestUtil.createDate("2024-01-01");
+			await TestUtil.connectAttendeeToDate(attendee.id, date.id);
 
-			const dbAttendee = await prisma.attendee.findUnique({
+			const response = await request(app)
+				.delete("/2024-01-01/김철수")
+				.set(
+					"Authorization",
+					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
+				);
+
+			expect(response.status).toBe(200);
+
+			// 참여자 삭제 확인
+			const attendees = await prisma.attendee.findUnique({
 				where: { id: attendee.id },
 			});
-			expect(dbAttendee).toBeNull();
-		});
+			expect(attendees).toBeNull();
 
-		it("존재하지 않는 참여자 삭제 시도 - 404", async () => {
-			const user = await TestUtil.createUser();
-			const record = await TestUtil.createRecord(
-				"2024-01-01",
-				"soju",
-				1,
-				user.id
-			);
-
-			const res = await request(app)
-				.delete("/김영희")
-				.query({ recordId: record.id })
-				.set(
-					"Authorization",
-					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
-				);
-
-			expect(res.status).toBe(404);
-			expect(res.text).toBe("Attendee not found");
-		});
-
-		it("존재하지 않는 기록에서 삭제 시도 - 404", async () => {
-			const user = await TestUtil.createUser();
-
-			const res = await request(app)
-				.delete("/김철수")
-				.query({ recordId: 999 })
-				.set(
-					"Authorization",
-					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
-				);
-
-			expect(res.status).toBe(404);
-			expect(res.text).toBe("Record not found");
+			// date와의 연결 삭제 확인
+			const dateAttendee = await prisma.dateAttendee.findFirst({
+				where: { attendeeId: attendee.id },
+			});
+			expect(dateAttendee).toBeNull();
 		});
 	});
 });
