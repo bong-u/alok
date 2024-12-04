@@ -1,5 +1,5 @@
-import React from "react";
-import { RecordType, Record, RecordTypeInfo } from "../types";
+import React, { useState, useEffect, useCallback } from "react";
+import { RecordType, Record, RecordTypeInfo, Attendee } from "../types";
 import api from "../api";
 
 interface ManageRecordModalProps {
@@ -8,11 +8,29 @@ interface ManageRecordModalProps {
 	onClose: () => void;
 }
 
-const ManageRecordModal = ({
+const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 	selectedDate,
 	records = [],
 	onClose,
 }: ManageRecordModalProps) => {
+	const [attendeeName, setAttendeeName] = useState("");
+	const [attendees, setAttendees] = useState<Attendee[]>([]);
+
+	const fetchAttendees = useCallback(async () => {
+		try {
+			const response = await api.get(`/attendees/${selectedDate}`);
+			setAttendees(response.data);
+		} catch (error: any) {
+			sessionStorage.setItem("error", error);
+			window.location.href = "/error";
+		}
+	}, [selectedDate]);
+
+	useEffect(() => {
+		if (!selectedDate) return;
+		fetchAttendees();
+	}, [fetchAttendees, selectedDate]);
+
 	const handleAddRecord = async (recordType: RecordType) => {
 		const amount = prompt("양을 입력해주세요");
 		if (!amount) return;
@@ -54,6 +72,44 @@ const ManageRecordModal = ({
 		}
 		onClose();
 	};
+
+	const handleAddAttendee = async () => {
+		if (!attendeeName) {
+			alert("참여자 이름을 입력해주세요.");
+			return;
+		}
+		if (records.length === 0) {
+			alert("기록을 먼저 추가해주세요.");
+			return;
+		}
+
+		try {
+			const response = await api.post(`/attendees/${selectedDate}/${attendeeName}`);
+
+			console.info(response.data);
+		}
+		catch (error: any) {
+			sessionStorage.setItem("error", error);
+			window.location.href = "/error";
+		}
+
+		fetchAttendees();
+		setAttendeeName("");
+	};
+
+	const handleRemoveAttendee = async (attendeeName: string) => {
+		if (!window.confirm(`${attendeeName} 참여자를 삭제하시겠습니까?`)) return;
+
+		try {
+			const response = await api.delete(`/attendees/${selectedDate}/${attendeeName}`);
+			console.info(response.data);
+		} catch (error: any) {
+			sessionStorage.setItem("error", error);
+			window.location.href = "/error";
+		}
+
+		fetchAttendees();
+	}
 
 	return (
 		<div
@@ -118,9 +174,45 @@ const ManageRecordModal = ({
 							);
 						}
 					)}
+					{/* 참여자 추가 UI */}
+					<div className="field is-flex is-align-items-center is-justify-content-space-between">
+						<label className="label" style={{ flexShrink: 0 }}>
+							참여자
+						</label>
+						<div className="control mx-3 is-flex-grow-1">
+							<input
+								className="input"
+								type="text"
+								value={attendeeName}
+								onChange={(e) =>
+									setAttendeeName(e.target.value)
+								}
+								placeholder="참여자 이름"
+							/>
+						</div>
+						<div className="control">
+							<button
+								className="button is-primary"
+								onClick={handleAddAttendee}
+							>
+								추가
+							</button>
+						</div>
+					</div>
+					{/* 참여자 목록 */}
+					<div className="tags">
+						{
+							Object.entries(attendees).map(([_, attendee]: [string, Attendee]) => (
+								<span key={attendee.id} className="tag is-dark is-size-6" onClick={() => handleRemoveAttendee(attendee.name)}>
+									{attendee.name}
+								</span>
+							))
+						}
+					</div>
+
 				</section>
 			</section>
-		</div>
+		</div >
 	);
 };
 

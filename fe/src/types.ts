@@ -20,3 +20,8 @@ export const RecordTypeInfo: {
 	soju: { korName: "소주", unit: "병", color: "green" },
 	beer: { korName: "맥주", unit: "잔", color: "brown" },
 };
+
+export interface Attendee {
+	id: number;
+	name: string;
+}
