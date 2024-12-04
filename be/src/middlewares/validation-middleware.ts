@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import Joi, { ObjectSchema } from "joi";
 
 const validationMiddleware =
-	(schema: ObjectSchema, source: "body" | "params" = "body") =>
+	(schema: ObjectSchema, source: "body" | "params" | "query" = "body") =>
 	(req: Request, res: Response, next: NextFunction) => {
 		const { error } = schema.validate(req[source]);
 		if (error) {

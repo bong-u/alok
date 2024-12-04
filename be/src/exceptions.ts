@@ -15,6 +15,12 @@ export class UserAlreadyExistsError extends Error {
 	}
 }
 
+export class RecordNotFoundError extends Error {
+	constructor() {
+		super("Record not found");
+	}
+}
+
 export class RecaptchaScoreTooLowError extends Error {
 	constructor() {
 		super("Recaptcha score too low");

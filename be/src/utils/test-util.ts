@@ -36,8 +36,8 @@ export const TestUtil = {
 				username,
 				password: hashedPassword,
 				isDeleted,
-				createdAt: new Date(),
-				updatedAt: new Date(),
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString(),
 			},
 		});
 		return {
@@ -54,20 +54,28 @@ export const TestUtil = {
 		return bcrypt.compare(password, hashedPassword);
 	},
 
+	async createDate(date: string): Promise<any> {
+		return await prisma.date.create({
+			data: {
+				date,
+			},
+		});
+	},
+
 	async createRecord(
-		date: string,
+		dateId: number,
 		recordType: string,
 		amount: number,
 		userId: number
-	): Promise<DailyRecord> {
-		return (await prisma.record.create({
+	): Promise<any> {
+		return await prisma.record.create({
 			data: {
-				date,
+				dateId,
 				recordType,
 				amount,
 				userId,
 			},
-		})) as DailyRecord;
+		});
 	},
 
 	async createAttendee(

@@ -7,7 +7,9 @@ import {
 } from "../interfaces/record-interfaces";
 import RecordService from "../services/record-service";
 import UserService from "../services/user-service";
+import DateService from "../services/date-service";
 import validationMiddleware from "../middlewares/validation-middleware";
+import { UserNotFoundError, RecordNotFoundError } from "../exceptions";
 
 const recordRouter = () => {
 	const router = Router();
@@ -30,14 +32,20 @@ const recordRouter = () => {
 		"/:year/:month",
 		validationMiddleware(getRecordsSchema, "params"),
 		async (req: any, res: Response) => {
-			const { year, month } = req.params;
+			const year = Number(req.params.year);
+			const month = Number(req.params.month);
 
-			const records = await RecordService.getRecordsByMonth(
-				Number(year),
-				Number(month),
-				req.userId
-			);
-			res.json(records);
+			try {
+				const records = await RecordService.getRecordsByMonth(
+					year,
+					month,
+					req.userId
+				);
+				res.json(records);
+			} catch (err: any) {
+				console.error(err);
+				res.status(500).send(err.message);
+			}
 		}
 	);
 
@@ -45,22 +53,28 @@ const recordRouter = () => {
 		"/:year/:month/user/:userId",
 		validationMiddleware(getRecordsSchema, "params"),
 		async (req: any, res: Response) => {
-			const { year, month, userId } = req.params;
+			const year = Number(req.params.year);
+			const month = Number(req.params.month);
+			const userId = Number(req.params.userId);
 
-			const user = await UserService.getUserById(Number(userId));
+			try {
+				const user = await UserService.getUserById(userId);
 
-			if (!user) {
-				res.status(404).send("User not found");
-				return;
+				const records = await RecordService.getRecordsByMonth(
+					year,
+					month,
+					userId
+				);
+
+				res.json(records);
+			} catch (err: any) {
+				if (err instanceof UserNotFoundError) {
+					res.status(404).send(err.message);
+					return;
+				}
+				console.error(err);
+				res.status(500).send(err.message);
 			}
-
-			const records = await RecordService.getRecordsByMonth(
-				Number(year),
-				Number(month),
-				Number(userId)
-			);
-
-			res.json(records);
 		}
 	);
 
@@ -68,28 +82,32 @@ const recordRouter = () => {
 		"/",
 		validationMiddleware(recordSchema),
 		async (req: any, res: Response) => {
-			const user = await UserService.getUserById(req.userId);
-			if (!user) {
-				res.status(404).send("User not found");
-				return;
-			}
-
-			// Date와 DrinkType이 같은 기록이 이미 존재하는지 확인
-			const existing_record = await RecordService.getRecordByDateAndType(
-				req.body.date,
-				req.body.recordType,
-				req.userId
-			);
-			if (existing_record) {
-				res.status(409).send("Record already exists");
-				return;
-			}
-
+			const { date, recordType } = req.body;
+			const userId = Number(req.userId);
 			try {
+				const user = await UserService.getUserById(req.userId);
+
+				if (
+					await RecordService.isRecordExist(date, recordType, userId)
+				) {
+					res.status(409).send("Record already exists");
+					return;
+				}
+
+				let dateId = await DateService.getDateId(req.body.date);
+				// Date가 존재하지 않으면 Date를 생성
+				if (!dateId) {
+					dateId = (await DateService.createDate(req.body.date)).id;
+				}
+
 				const record = req.body as DailyRecord;
-				await RecordService.createRecord(record, req.userId);
+				await RecordService.createRecord(record, dateId, req.userId);
 				res.status(201).send("Record created successfully");
 			} catch (err: any) {
+				if (err instanceof UserNotFoundError) {
+					res.status(404).send(err.message);
+					return;
+				}
 				console.error(err);
 				res.status(500).send(err.message);
 			}
@@ -101,27 +119,22 @@ const recordRouter = () => {
 		validationMiddleware(deleteRecordRequestSchema, "params"),
 		async (req: any, res: Response) => {
 			const { date, recordType } = req.params;
-
-			// date와 drinkType 해당하는 기록이 존재하는지 확인
-			const record = await RecordService.getRecordByDateAndType(
-				date,
-				recordType,
-				req.userId
-			);
-
-			if (!record) {
-				res.status(404).send("Record not found");
-				return;
-			}
-
+			const userId = Number(req.userId);
 			try {
-				RecordService.deleteRecordByDateAndType(
+				const recordId = await RecordService.getRecordIdByDateAndType(
 					date,
 					recordType,
-					req.userId
+					userId
 				);
+				const dateId = await DateService.getDateId(date);
+
+				RecordService.deleteRecordById(recordId);
 				res.status(200).send("Record deleted successfully");
 			} catch (err: any) {
+				if (err instanceof RecordNotFoundError) {
+					res.status(404).send(err.message);
+					return;
+				}
 				console.error(err);
 				res.status(500).send(err.message);
 			}

@@ -28,6 +28,7 @@ describe("Record Router", () => {
 
 	beforeEach(async () => {
 		await prisma.record.deleteMany();
+		await prisma.date.deleteMany();
 		await prisma.user.deleteMany();
 	});
 
@@ -38,7 +39,8 @@ describe("Record Router", () => {
 	describe("POST /api/records", () => {
 		it("중복된 데이터 - 409", async () => {
 			const user = await TestUtil.createUser();
-			await TestUtil.createRecord("2024-01-01", "soju", 3.5, user.id);
+			const dateId = (await TestUtil.createDate("2024-01-01")).id;
+			await TestUtil.createRecord(dateId, "soju", 3.5, user.id);
 			const res = await request(app)
 				.post("/")
 				.send({
@@ -84,8 +86,10 @@ describe("Record Router", () => {
 		it("연별 데이터 조회 - 200", async () => {
 			const user1 = await TestUtil.createUser();
 			const user2 = await TestUtil.createUser();
-			await TestUtil.createRecord("2024-01-01", "soju", 3.5, user1.id);
-			await TestUtil.createRecord("2024-01-02", "soju", 3.5, user2.id);
+			const dateId1 = (await TestUtil.createDate("2024-01-01")).id;
+			const dateId2 = (await TestUtil.createDate("2024-01-02")).id;
+			await TestUtil.createRecord(dateId1, "soju", 3.5, user1.id);
+			await TestUtil.createRecord(dateId2, "soju", 3.5, user2.id);
 
 			const response = await request(app)
 				.get("/2024")
@@ -109,6 +113,7 @@ describe("Record Router", () => {
 			expect(response.status).toBe(400);
 		});
 	});
+
 	describe("GET /records/2024/1", () => {
 		it("빈 데이터 조회 - 200", async () => {
 			const user = await TestUtil.createUser();
@@ -123,8 +128,10 @@ describe("Record Router", () => {
 		});
 		it("월별 데이터 조회 - 200", async () => {
 			const user = await TestUtil.createUser();
-			await TestUtil.createRecord("2024-01-01", "soju", 3.5, user.id);
-			await TestUtil.createRecord("2024-01-02", "soju", 3.5, user.id);
+			const dateId1 = (await TestUtil.createDate("2024-01-01")).id;
+			const dateId2 = (await TestUtil.createDate("2024-01-02")).id;
+			await TestUtil.createRecord(dateId1, "soju", 3.5, user.id);
+			await TestUtil.createRecord(dateId2, "soju", 3.5, user.id);
 
 			const response = await request(app)
 				.get("/2024/01")
@@ -168,8 +175,10 @@ describe("Record Router", () => {
 			const user1 = await TestUtil.createUser();
 			const user2 = await TestUtil.createUser();
 
-			await TestUtil.createRecord("2024-01-01", "soju", 3.5, user1.id);
-			await TestUtil.createRecord("2024-01-02", "soju", 2.5, user2.id);
+			const dateId1 = (await TestUtil.createDate("2024-01-01")).id;
+			const dateId2 = (await TestUtil.createDate("2024-01-02")).id;
+			await TestUtil.createRecord(dateId1, "soju", 3.5, user1.id);
+			await TestUtil.createRecord(dateId2, "soju", 2.5, user2.id);
 
 			const response = await request(app)
 				.get(`/2024/01/user/${user1.id}`)
@@ -187,7 +196,8 @@ describe("Record Router", () => {
 	describe("DELETE /api/records/:date/:recordType", () => {
 		it("DELETE - 200", async () => {
 			const user = await TestUtil.createUser();
-			await TestUtil.createRecord("2024-01-01", "soju", 3.5, user.id);
+			const dateId = (await TestUtil.createDate("2024-01-01")).id;
+			await TestUtil.createRecord(dateId, "soju", 3.5, user.id);
 
 			const res = await request(app)
 				.delete("/2024-01-01/soju")

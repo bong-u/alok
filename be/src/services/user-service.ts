@@ -77,7 +77,7 @@ class UserService {
 				data: {
 					username,
 					password: hashedPassword,
-					createdAt: new Date(),
+					createdAt: new Date().toISOString(),
 				},
 			})
 			.then((user) => user.id);
@@ -102,7 +102,10 @@ class UserService {
 		const hashedPassword = bcrypt.hashSync(newPassword, SALT_ROUNDS);
 		await prisma.user.update({
 			where: { id: userId, isDeleted: false },
-			data: { password: hashedPassword, updatedAt: new Date() },
+			data: {
+				password: hashedPassword,
+				updatedAt: new Date().toISOString(),
+			},
 		});
 		return true;
 	}
