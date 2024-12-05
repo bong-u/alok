@@ -6,6 +6,7 @@
 	"scripts": {
 		"build": "npx tsc",
 		"start": "npx tsc && NODE_ENV=prod node dist/index.js",
+		"testserver": "npx tsc && NODE_ENV=test node dist/index.js",
 		"dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
 		"test": "npx tsc && npx jest"
 	},
