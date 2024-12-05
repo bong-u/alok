@@ -137,68 +137,48 @@ describe("User Router", () => {
 			expect(response.status).toBe(409);
 		});
 
-		it("4글자 미만의 username으로 사용자 생성 실패", async () => {
-			const response = await request(app).post("/signup").send({
-				username: "123",
+		const SIGNUP_400_TEST_DATA = [
+			{
+				username: "123", // 4글자 미만
 				password: "testuser1",
-				recaptchaToken: TEST_RECAPTCHA_TOKEN,
-			});
-			expect(response.status).toBe(400);
-		});
-
-		it("20글자 초과의 username으로 사용자 생성 실패", async () => {
-			const response = await request(app).post("/signup").send({
-				username: "123456789012345678901",
+			},
+			{
+				username: "123456789012345678901", // 20글자 초과
 				password: "testuser1",
-				recaptchaToken: TEST_RECAPTCHA_TOKEN,
-			});
-			expect(response.status).toBe(400);
-		});
-
-		it("특수문자가 포함된 username으로 사용자 생성 실패", async () => {
-			const response = await request(app).post("/signup").send({
-				username: "testuser!",
+			},
+			{
+				username: "testuser!", // 특수문자 포함
 				password: "testuser1",
-				recaptchaToken: TEST_RECAPTCHA_TOKEN,
-			});
-			expect(response.status).toBe(400);
-		});
-
-		it("공백이 포함된 username으로 사용자 생성 실패", async () => {
-			const response = await request(app).post("/signup").send({
-				username: "test user",
+			},
+			{
+				username: "test user", // 공백 포함
 				password: "testuser1",
-				recaptchaToken: TEST_RECAPTCHA_TOKEN,
-			});
-			expect(response.status).toBe(400);
-		});
-
-		it("8글자 미만의 password로 사용자 생성 실패", async () => {
-			const response = await request(app).post("/signup").send({
+			},
+			{
 				username: "testuser1",
-				password: "a234567",
-				recaptchaToken: TEST_RECAPTCHA_TOKEN,
-			});
-			expect(response.status).toBe(400);
-		});
-
-		it("20글자 초과의 password로 사용자 생성 실패", async () => {
-			const response = await request(app).post("/signup").send({
+				password: "a234567", // 8글자 미만
+			},
+			{
 				username: "testuser1",
-				password: "a23456789012345678901",
-				recaptchaToken: TEST_RECAPTCHA_TOKEN,
-			});
-			expect(response.status).toBe(400);
-		});
-
-		it("공백이 포함된 password로 사용자 생성 실패", async () => {
-			const response = await request(app).post("/signup").send({
+				password: "a23456789012345678901", // 20글자 초과
+			},
+			{
 				username: "testuser1",
-				password: "test user123",
-				recaptchaToken: TEST_RECAPTCHA_TOKEN,
-			});
-			expect(response.status).toBe(400);
-		});
+				password: "test user123", // 공백 포함
+			},
+		];
+
+		it.each(SIGNUP_400_TEST_DATA)(
+			"사용자 생성 실패 #%# - 400",
+			async (data) => {
+				const response = await request(app).post("/signup").send({
+					username: data.username,
+					password: data.password,
+					recaptchaToken: TEST_RECAPTCHA_TOKEN,
+				});
+				expect(response.status).toBe(400);
+			}
+		);
 	});
 
 	describe("POST /api/users/login", () => {
