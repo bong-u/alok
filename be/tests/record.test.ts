@@ -194,10 +194,12 @@ describe("Record Router", () => {
 	});
 
 	describe("DELETE /api/records/:date/:recordType", () => {
-		it("DELETE - 200", async () => {
+		it("record 삭제 (date도 삭제) - 200", async () => {
 			const user = await TestUtil.createUser();
 			const dateId = (await TestUtil.createDate("2024-01-01")).id;
-			await TestUtil.createRecord(dateId, "soju", 3.5, user.id);
+			const recordId = (
+				await TestUtil.createRecord(dateId, "soju", 3.5, user.id)
+			).id;
 
 			const res = await request(app)
 				.delete("/2024-01-01/soju")
@@ -206,6 +208,47 @@ describe("Record Router", () => {
 					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
 				);
 			expect(res.status).toBe(200);
+
+			// record가 삭제되었는지 확인
+			const recordObj = await prisma.record.findUnique({
+				where: { id: recordId },
+			});
+			expect(recordObj).toBeNull();
+
+			// date가 삭제되었는지 확인
+			const dateObj = await prisma.date.findUnique({
+				where: { id: dateId },
+			});
+			expect(dateObj).toBeNull();
+		});
+
+		it("record 삭제 (date는 유지) - 200", async () => {
+			const user = await TestUtil.createUser();
+			const dateId = (await TestUtil.createDate("2024-01-01")).id;
+			const recordId = (
+				await TestUtil.createRecord(dateId, "soju", 3.5, user.id)
+			).id;
+			await TestUtil.createRecord(dateId, "beer", 2.5, user.id);
+
+			const res = await request(app)
+				.delete("/2024-01-01/soju")
+				.set(
+					"Authorization",
+					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
+				);
+			expect(res.status).toBe(200);
+
+			// record가 삭제되었는지 확인
+			const recordObj = await prisma.record.findUnique({
+				where: { id: recordId },
+			});
+			expect(recordObj).toBeNull();
+
+			// date가 유지되는지 확인
+			const dateObj = await prisma.date.findUnique({
+				where: { id: dateId },
+			});
+			expect(dateObj).not.toBeNull();
 		});
 
 		it("존재하지 않는 데이터 - 404", async () => {

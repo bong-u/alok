@@ -11,7 +11,29 @@ class DateService {
 			},
 		});
 	}
-	static async getDate(date: string, userId: number): Promise<any> {
+
+	static async getDateAndRecords(date: string, userId: number): Promise<any> {
+		const dateObj = await prisma.date.findUnique({
+			where: {
+				date,
+			},
+			include: {
+				records: {
+					where: {
+						userId,
+					},
+				},
+			},
+		});
+
+		if (!dateObj) throw new DateNotFoundError();
+		return dateObj;
+	}
+
+	static async getDateAndAttendees(
+		date: string,
+		userId: number
+	): Promise<any> {
 		const dateObj = await prisma.date.findUnique({
 			where: {
 				date,
@@ -44,6 +66,14 @@ class DateService {
 		if (!dateObj) throw new DateNotFoundError();
 
 		return dateObj.id;
+	}
+
+	static async deleteDateById(dateId: number) {
+		return await prisma.date.delete({
+			where: {
+				id: dateId,
+			},
+		});
 	}
 }
 

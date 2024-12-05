@@ -83,13 +83,13 @@ class RecordService {
 	}
 
 	static async isRecordExist(
-		date: string,
+		dateId: number,
 		recordType: string,
 		userId: number
 	): Promise<boolean> {
 		try {
 			await RecordService.getRecordIdByDateAndType(
-				date,
+				dateId,
 				recordType,
 				userId
 			);
@@ -103,20 +103,13 @@ class RecordService {
 	}
 
 	static async getRecordIdByDateAndType(
-		date: string,
+		dateId: number,
 		recordType: string,
 		userId: number
 	): Promise<number> {
-		const dateRow = await prisma.date.findUnique({
-			where: { date },
-			select: { id: true },
-		});
-
-		if (!dateRow?.id) throw new RecordNotFoundError();
-
 		const record = await prisma.record.findFirst({
 			where: {
-				dateId: dateRow.id,
+				dateId,
 				recordType,
 				userId,
 			},
