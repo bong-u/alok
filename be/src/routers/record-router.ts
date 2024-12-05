@@ -62,13 +62,10 @@ const recordRouter = () => {
 			const userId = Number(req.params.userId);
 
 			try {
-				await UserService.getUserById(userId);
-
-				const records = await RecordService.getRecordsByMonth(
-					year,
-					month,
-					userId
-				);
+				const [_, records] = await Promise.all([
+					UserService.getUserById(userId),
+					RecordService.getRecordsByMonth(year, month, userId),
+				]);
 
 				res.json(records);
 			} catch (err: any) {
