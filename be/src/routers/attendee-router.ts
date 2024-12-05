@@ -89,12 +89,12 @@ const attendeeRouter = () => {
 		const userId = Number(req.userId);
 
 		try {
-			const attendee = await AttendeeService.getAttendeeByName(
-				attendeeName,
-				userId
-			);
-			const dateId = await DateService.getDateId(date);
+			const [attendee, dateId] = await Promise.all([
+				AttendeeService.getAttendeeByName(attendeeName, userId),
+				DateService.getDateId(date),
+			]);
 
+			// 참여자가 없는 경우
 			if (await AttendeeService.isAttended(dateId, attendee.id)) {
 				throw new AttendeeNotFoundError();
 			}
