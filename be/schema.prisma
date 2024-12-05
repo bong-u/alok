@@ -12,7 +12,7 @@ model User {
   username  String   @unique
   password  String
   isDeleted Boolean  @default(false) @map("is_deleted")
-  createdAt DateTime @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   records   Record[]

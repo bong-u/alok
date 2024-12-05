@@ -77,7 +77,6 @@ class UserService {
 				data: {
 					username,
 					password: hashedPassword,
-					createdAt: new Date().toISOString(),
 				},
 			})
 			.then((user) => user.id);
