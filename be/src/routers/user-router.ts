@@ -130,10 +130,10 @@ const userRouter = () => {
 			try {
 				const userId =
 					await TokenService.getUserIdFromToken(refreshToken);
+				const accessToken = TokenService.generateAccessToken(userId);
 
 				res.status(200).json({
-					access_token:
-						TokenService.generateAccessToken(userId),
+					access_token: accessToken,
 				});
 			} catch (err: any) {
 				if (
