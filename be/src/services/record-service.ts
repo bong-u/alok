@@ -4,7 +4,7 @@ import {
 	MonthlyRecord,
 	RecordsGroupedByPeriod,
 } from "../interfaces/record-interfaces";
-import { RecordNotFoundError } from "../exceptions";
+import { RecordNotFoundError, RecordAlreadyExistsError } from "../exceptions";
 
 const prisma = new PrismaClient();
 

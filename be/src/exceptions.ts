@@ -21,6 +21,12 @@ export class RecordNotFoundError extends Error {
 	}
 }
 
+export class RecordAlreadyExistsError extends Error {
+	constructor() {
+		super("Record already exists");
+	}
+}
+
 export class DateNotFoundError extends Error {
 	constructor() {
 		super("Date not found");
