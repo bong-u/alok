@@ -1,6 +1,6 @@
 process.env.NODE_ENV = "test";
 require("dotenv").config({ path: ".env.test" });
-require("child_process").execSync("npx prisma db push");
+require("child_process").execSync("npx prisma db push --accept-data-loss");
 
 module.exports = {
 	preset: "ts-jest", // Ts-jest를 사용하여 TypeScript를 트랜스파일링

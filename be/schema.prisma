@@ -1,5 +1,5 @@
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -17,6 +17,8 @@ model User {
 
   records   Record[]
   attendees Attendee[]
+
+  @@map("member")
 }
 
 model Date {
@@ -25,19 +27,22 @@ model Date {
 
   records       Record[]
   dateAttendees DateAttendee[]
+
+  @@map("date")
 }
 
 model Record {
   id         Int    @id @default(autoincrement())
   dateId     Int    @map("date_id")
   recordType String @map("record_type")
-  amount     Float
+  amount     Float  @db.Real
   userId     Int    @map("user_id")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   date Date @relation(fields: [dateId], references: [id], onDelete: Cascade)
 
   @@unique([dateId, recordType, userId])
+  @@map("record")
 }
 
 model Attendee {
@@ -48,6 +53,7 @@ model Attendee {
   user User @relation(fields: [partnerUserId], references: [id], onDelete: Cascade)
 
   dateAttendees DateAttendee[]
+  @@map("attendee")
 }
 
 model DateAttendee {
@@ -58,4 +64,5 @@ model DateAttendee {
   attendee Attendee @relation(fields: [attendeeId], references: [id], onDelete: Cascade)
 
   @@id([dateId, attendeeId])
+  @@map("date_attendee")
 }
