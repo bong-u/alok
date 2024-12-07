@@ -76,7 +76,7 @@ const attendeeRouter = () => {
 			res.status(200).send(attendees);
 		} catch (err: any) {
 			if (err instanceof DateNotFoundError) {
-				res.status(404).send(err.message);
+				res.status(200).send([]);
 				return;
 			}
 			console.error(err);
