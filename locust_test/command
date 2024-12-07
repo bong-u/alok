@@ -1,0 +1,7 @@
+docker run --rm -it \
+  -v $(pwd):/mnt/locust \
+  -w /mnt/locust \
+  -p 8089:8089 \
+  locustio/locust:latest \
+  --host https://alok.bongu.o-r.kr \
+  -f record_create_delete.py
