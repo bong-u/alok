@@ -157,14 +157,16 @@ const MyCalendarPage: React.FC = () => {
 			onTouchStart={handleTouchStart}
 			onTouchEnd={handleTouchEnd}
 		>
-			<ManageRecordModal
-				selectedDate={selectedDate}
-				records={records[selectedDate || ""]}
-				onClose={() => {
-					setSelectedDate(null);
-					fetchRecordsByMonth(activeDate);
-				}}
-			/>
+			{selectedDate && (
+				<ManageRecordModal
+					selectedDate={selectedDate}
+					records={records[selectedDate || ""]}
+					onClose={() => {
+						setSelectedDate(null);
+						fetchRecordsByMonth(activeDate);
+					}}
+				/>
+			)}
 			<MyCalendar
 				records={records}
 				tileContent={getTileContent}
