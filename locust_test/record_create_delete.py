@@ -36,9 +36,6 @@ class APIUser(HttpUser):
         """
         기록 생성 및 삭제 반복
         """
-        if self.user_index < self.environment.runner.user_count:
-            return
-
         task_index = next(self.task_index)
 
         base_date = datetime.strptime("2000-01-01", "%Y-%m-%d")
