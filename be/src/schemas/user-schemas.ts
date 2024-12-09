@@ -1,18 +1,5 @@
 import Joi from "joi";
 
-interface UserBase {
-	username: string;
-}
-
-export interface UserResponse extends UserBase {
-	id: number;
-}
-
-export interface TokenResponse {
-	accessToken: string;
-	refreshToken: string;
-}
-
 export const loginSchema = Joi.object({
 	username: Joi.string().required(),
 	password: Joi.string().required(),

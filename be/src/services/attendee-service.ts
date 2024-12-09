@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { AttendeeNotFoundError } from "../exceptions";
-import { AttendeeResponse } from "../interfaces/attendee-interfaces";
+import { AttendeeResponse } from "../types/attendee-types";
 
 const prisma = new PrismaClient();
 

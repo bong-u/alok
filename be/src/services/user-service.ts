@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { UserResponse } from "../interfaces/user-interfaces";
+import { UserResponse } from "../types/user-types";
 import {
 	UserNotFoundError,
 	UserAuthenticationFailedError,

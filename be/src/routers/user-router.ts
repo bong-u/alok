@@ -9,7 +9,7 @@ import {
 	terminateTokenSchema,
 	passwordChangeSchema,
 	signupSchema,
-} from "../interfaces/user-interfaces";
+} from "../schemas/user-schemas";
 import {
 	UserNotFoundError,
 	UserAuthenticationFailedError,

@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { DateNotFoundError } from "../exceptions";
+import { DateAndRecords, DateAndAttendees } from "../types/date-types";
 
 const prisma = new PrismaClient();
 

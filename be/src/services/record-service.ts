@@ -3,7 +3,7 @@ import {
 	DailyRecord,
 	MonthlyRecord,
 	RecordsGroupedByPeriod,
-} from "../interfaces/record-interfaces";
+} from "../types/record-types";
 import { RecordNotFoundError, RecordAlreadyExistsError } from "../exceptions";
 
 const prisma = new PrismaClient();

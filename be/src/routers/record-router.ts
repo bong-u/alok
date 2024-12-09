@@ -1,10 +1,10 @@
 import { Router, Response } from "express";
+import { DailyRecord } from "../types/record-types";
 import {
-	DailyRecord,
 	recordSchema,
 	getRecordsSchema,
 	deleteRecordRequestSchema,
-} from "../interfaces/record-interfaces";
+} from "../schemas/record-schemas";
 import RecordService from "../services/record-service";
 import UserService from "../services/user-service";
 import DateService from "../services/date-service";
