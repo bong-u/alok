@@ -6,4 +6,5 @@ dist/
 migrations/
 src/**/*.js
 src/insert.ts
+backup.sqlite3
 
