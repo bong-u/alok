@@ -251,6 +251,19 @@ describe("User Router", () => {
 				.set("Authorization", `Bearer ${newAccessToken}`);
 			expect(newAccessTokenResponse.status).toBe(200);
 		});
+
+		it("만료된 refresh token으로 토큰 재발급 실패", async () => {
+			const user = await TestUtil.createUser();
+
+			TokenService.generateAccessToken(user.id);
+			const refreshToken = "INVALID_REFRESH_TOKEN";
+
+			const response = await request(app)
+				.post("/refresh")
+				.send({ refresh_token: refreshToken });
+
+			expect(response.status).toBe(401);
+		});
 	});
 
 	describe("PATCH /api/users/password", () => {

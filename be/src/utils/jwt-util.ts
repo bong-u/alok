@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { InvalidTokenError } from "../exceptions";
 
 const secret = "secret";
 const ACCESS_TOKEN_EXPIRATION = process.env.ACCESS_TOKEN_EXPIRATION || "1m";
@@ -29,7 +30,7 @@ const JwtUtil = {
 		return new Promise((resolve, reject) => {
 			jwt.verify(token, secret, (err, decoded) => {
 				if (err) {
-					return reject(err);
+					return reject(new InvalidTokenError());
 				}
 				if (
 					decoded &&
@@ -39,7 +40,7 @@ const JwtUtil = {
 				) {
 					resolve(decoded.userId as any as number);
 				}
-				reject(new Error("Invalid token payload"));
+				reject(new InvalidTokenError());
 			});
 		});
 	},
