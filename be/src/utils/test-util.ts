@@ -5,6 +5,19 @@ import { randomBytes } from "crypto";
 const prisma = new PrismaClient();
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS || "10");
 
+interface DateResult {
+	id: number;
+	date: string;
+}
+
+interface RecordResult {
+	id: number;
+	dateId: number;
+	recordType: string;
+	amount: number;
+	userId: number;
+}
+
 interface UserResult {
 	id: number;
 	username: string;
@@ -16,6 +29,11 @@ interface AttendeeResult {
 	id: number;
 	name: string;
 	partnerUserId: number;
+}
+
+interface AttendeeDateResult {
+	attendeeId: number;
+	dateId: number;
 }
 
 const generateRandomString = (): string => {
@@ -53,7 +71,7 @@ export const TestUtil = {
 		return bcrypt.compare(password, hashedPassword);
 	},
 
-	async createDate(date: string): Promise<any> {
+	async createDate(date: string): Promise<DateResult> {
 		return await prisma.date.create({
 			data: {
 				date,
@@ -66,7 +84,7 @@ export const TestUtil = {
 		recordType: string,
 		amount: number,
 		userId: number
-	): Promise<any> {
+	): Promise<RecordResult> {
 		return await prisma.record.create({
 			data: {
 				dateId,
@@ -92,7 +110,7 @@ export const TestUtil = {
 	async connectAttendeeToDate(
 		attendeeId: number,
 		dateId: number
-	): Promise<any> {
+	): Promise<AttendeeDateResult> {
 		return await prisma.dateAttendee.create({
 			data: {
 				dateId,

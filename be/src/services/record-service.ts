@@ -94,7 +94,7 @@ class RecordService {
 				userId
 			);
 			return true;
-		} catch (error: any) {
+		} catch (error) {
 			if (error instanceof RecordNotFoundError) {
 				return false;
 			}

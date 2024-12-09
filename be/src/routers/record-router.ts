@@ -1,4 +1,4 @@
-import { Router, Response } from "express";
+import { Request, Router, Response } from "express";
 import { DailyRecord } from "../types/record-types";
 import {
 	recordSchema,
@@ -22,7 +22,7 @@ const recordRouter = () => {
 	router.get(
 		"/:year",
 		validationMiddleware(getRecordsSchema, "params"),
-		async (req: any, res: Response) => {
+		async (req: Request, res: Response) => {
 			const year: number = Number(req.params.year);
 
 			const records = await RecordService.getRecordsByYear(
@@ -36,7 +36,7 @@ const recordRouter = () => {
 	router.get(
 		"/:year/:month",
 		validationMiddleware(getRecordsSchema, "params"),
-		async (req: any, res: Response) => {
+		async (req: Request, res: Response) => {
 			const year = Number(req.params.year);
 			const month = Number(req.params.month);
 
@@ -47,9 +47,9 @@ const recordRouter = () => {
 					req.userId
 				);
 				res.json(records);
-			} catch (err: any) {
+			} catch (err: unknown) {
 				console.error(err);
-				res.status(500).send(err.message);
+				res.status(500).send((err as Error).message);
 			}
 		}
 	);
@@ -57,25 +57,25 @@ const recordRouter = () => {
 	router.get(
 		"/:year/:month/user/:userId",
 		validationMiddleware(getRecordsSchema, "params"),
-		async (req: any, res: Response) => {
+		async (req: Request, res: Response) => {
 			const year = Number(req.params.year);
 			const month = Number(req.params.month);
 			const userId = Number(req.params.userId);
 
 			try {
-				const [_, records] = await Promise.all([
+				const [, records] = await Promise.all([
 					UserService.getUserById(userId),
 					RecordService.getRecordsByMonth(year, month, userId),
 				]);
 
 				res.json(records);
-			} catch (err: any) {
+			} catch (err: unknown) {
 				if (err instanceof UserNotFoundError) {
 					res.status(404).send(err.message);
 					return;
 				}
 				console.error(err);
-				res.status(500).send(err.message);
+				res.status(500).send((err as Error).message);
 			}
 		}
 	);
@@ -83,7 +83,7 @@ const recordRouter = () => {
 	router.post(
 		"/",
 		validationMiddleware(recordSchema),
-		async (req: any, res: Response) => {
+		async (req: Request, res: Response) => {
 			const { date, recordType, amount } = req.body;
 			const userId = Number(req.userId);
 			// let dateId: number;
@@ -119,7 +119,7 @@ const recordRouter = () => {
 					req.userId
 				);
 				res.status(201).send("Record created successfully");
-			} catch (err: any) {
+			} catch (err: unknown) {
 				if (err instanceof UserNotFoundError) {
 					res.status(404).send(err.message);
 					return;
@@ -129,7 +129,7 @@ const recordRouter = () => {
 					return;
 				}
 				console.error(err);
-				res.status(500).send(err.message);
+				res.status(500).send((err as Error).message);
 			}
 		}
 	);
@@ -137,8 +137,9 @@ const recordRouter = () => {
 	router.delete(
 		"/:date/:recordType",
 		validationMiddleware(deleteRecordRequestSchema, "params"),
-		async (req: any, res: Response) => {
-			const { date, recordType } = req.params;
+		async (req: Request, res: Response) => {
+			const date = String(req.params.date);
+			const recordType = String(req.params.recordType);
 			const userId = Number(req.userId);
 			try {
 				const dateObj = await DateService.getDateAndRecords(
@@ -161,7 +162,7 @@ const recordRouter = () => {
 					await RecordService.deleteRecordById(recordId);
 				}
 				res.status(200).send("Record deleted successfully");
-			} catch (err: any) {
+			} catch (err: unknown) {
 				if (
 					err instanceof DateNotFoundError ||
 					err instanceof RecordNotFoundError
@@ -170,7 +171,7 @@ const recordRouter = () => {
 					return;
 				}
 				console.error(err);
-				res.status(500).send(err.message);
+				res.status(500).send((err as Error).message);
 			}
 		}
 	);

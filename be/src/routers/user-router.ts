@@ -23,28 +23,28 @@ import {
 const userRouter = () => {
 	const router = Router();
 
-	router.get("/me", authMiddleware, async (req: any, res: Response) => {
+	router.get("/me", authMiddleware, async (req: Request, res: Response) => {
 		const userId = req.userId;
 		try {
 			const user = await UserService.getUserById(userId);
 			res.status(200).json({ id: userId, username: user.username });
-		} catch (err: any) {
+		} catch (err: unknown) {
 			if (err instanceof UserNotFoundError) {
 				res.status(404).send(err.message);
 			} else {
 				console.error(err);
-				res.status(500).send(err.message);
+				res.status(500).send((err as Error).message);
 			}
 		}
 	});
 
-	router.get("/all", authMiddleware, async (_: any, res: Response) => {
+	router.get("/all", authMiddleware, async (_: Request, res: Response) => {
 		try {
 			const users = await UserService.getAllUsers();
 			res.status(200).json(users);
-		} catch (err: any) {
+		} catch (err: unknown) {
 			console.error(err);
-			res.status(500).send(err.message);
+			res.status(500).send((err as Error).message);
 		}
 	});
 
@@ -63,12 +63,12 @@ const userRouter = () => {
 					access_token: TokenService.generateAccessToken(userId),
 					refresh_token: TokenService.generateRefreshToken(userId),
 				});
-			} catch (err: any) {
+			} catch (err: unknown) {
 				if (err instanceof UserAuthenticationFailedError) {
 					res.status(401).send(err.message);
 				} else {
 					console.error(err);
-					res.status(500).send(err.message);
+					res.status(500).send((err as Error).message);
 				}
 			}
 		}
@@ -84,7 +84,7 @@ const userRouter = () => {
 				await UserService.verifyRecaptcha(recaptchaToken);
 				await UserService.createUser(username, password);
 				res.status(201).send("User created successfully");
-			} catch (err: any) {
+			} catch (err: unknown) {
 				if (err instanceof RecaptchaScoreTooLowError) {
 					res.status(403).send(err.message);
 				} else if (err instanceof RecaptchaTokenInvalidError) {
@@ -93,7 +93,7 @@ const userRouter = () => {
 					res.status(409).send(err.message);
 				} else {
 					console.error(err);
-					res.status(500).send(err.message);
+					res.status(500).send((err as Error).message);
 				}
 			}
 		}
@@ -108,7 +108,7 @@ const userRouter = () => {
 				TokenService.addToBlacklist(access_token);
 				TokenService.addToBlacklist(refresh_token);
 				res.status(204).send();
-			} catch (err: any) {
+			} catch (err: unknown) {
 				if (
 					err instanceof InvalidTokenError ||
 					err instanceof TokenBlacklistedError
@@ -116,7 +116,7 @@ const userRouter = () => {
 					res.status(401).send(err.message);
 				} else {
 					console.error(err);
-					res.status(500).send(err.message);
+					res.status(500).send((err as Error).message);
 				}
 			}
 		}
@@ -135,7 +135,7 @@ const userRouter = () => {
 				res.status(200).json({
 					access_token: accessToken,
 				});
-			} catch (err: any) {
+			} catch (err: unknown) {
 				if (
 					err instanceof InvalidTokenError ||
 					err instanceof TokenBlacklistedError
@@ -143,7 +143,7 @@ const userRouter = () => {
 					res.status(401).send(err.message);
 				} else {
 					console.error(err);
-					res.status(500).send(err.message);
+					res.status(500).send((err as Error).message);
 				}
 			}
 		}
@@ -153,7 +153,7 @@ const userRouter = () => {
 		"/password",
 		validationMiddleware(passwordChangeSchema),
 		authMiddleware,
-		async (req: any, res: Response) => {
+		async (req: Request, res: Response) => {
 			const userId = req.userId;
 			const { old_password: oldPassword, new_password: newPassword } =
 				req.body;
@@ -162,9 +162,9 @@ const userRouter = () => {
 				await UserService.authenticateById(userId, oldPassword);
 				await UserService.changePassword(userId, newPassword);
 				res.status(204).send();
-			} catch (err: any) {
+			} catch (err: unknown) {
 				console.error(err);
-				res.status(500).send(err.message);
+				res.status(500).send((err as Error).message);
 			}
 		}
 	);
@@ -173,7 +173,7 @@ const userRouter = () => {
 		"/me",
 		authMiddleware,
 		validationMiddleware(terminateTokenSchema),
-		async (req: any, res: Response) => {
+		async (req: Request, res: Response) => {
 			const userId = req.userId;
 			const { access_token: acessToken, refresh_token: refreshToken } =
 				req.body;
@@ -184,14 +184,14 @@ const userRouter = () => {
 				await UserService.getUserById(userId);
 				await UserService.deleteUser(userId);
 				res.status(204).send();
-			} catch (err: any) {
+			} catch (err: unknown) {
 				if (err instanceof UserNotFoundError) {
 					res.status(404).send(err.message);
 				} else if (err instanceof InvalidTokenError) {
 					res.status(401).send(err.message);
 				} else {
 					console.error(err);
-					res.status(500).send(err.message);
+					res.status(500).send((err as Error).message);
 				}
 			}
 		}

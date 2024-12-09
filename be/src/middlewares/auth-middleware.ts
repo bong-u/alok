@@ -1,6 +1,12 @@
 import TokenService from "../services/token-service";
+import { Request, Response, NextFunction } from "express";
+import { InvalidTokenError, TokenBlacklistedError } from "../exceptions";
 
-const authMiddleware = async (req: any, res: any, next: any) => {
+const authMiddleware = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
 	const authHeader = req.headers.authorization;
 
 	if (!authHeader) {
@@ -10,14 +16,20 @@ const authMiddleware = async (req: any, res: any, next: any) => {
 		});
 	}
 
-	const token = authHeader.split("Bearer ")[1];
 	try {
+		const token = String(authHeader.split("Bearer ")[1]);
 		req.userId = await TokenService.getUserIdFromToken(token);
-		next();
-	} catch (error) {
-		res.status(401).send({
-			message: "Invalid token",
-		});
+		return next();
+	} catch (err: unknown) {
+		if (
+			err instanceof InvalidTokenError ||
+			err instanceof TokenBlacklistedError
+		) {
+			res.status(401).send(err.message);
+		} else {
+			console.error(err);
+			res.status(500).send((err as Error).message);
+		}
 	}
 };
 

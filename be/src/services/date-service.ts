@@ -13,7 +13,10 @@ class DateService {
 		});
 	}
 
-	static async getDateAndRecords(date: string, userId: number): Promise<any> {
+	static async getDateAndRecords(
+		date: string,
+		userId: number
+	): Promise<DateAndRecords> {
 		const dateObj = await prisma.date.findUnique({
 			where: {
 				date,
@@ -34,7 +37,7 @@ class DateService {
 	static async getDateAndAttendees(
 		date: string,
 		userId: number
-	): Promise<any> {
+	): Promise<DateAndAttendees> {
 		const dateObj = await prisma.date.findUnique({
 			where: {
 				date,

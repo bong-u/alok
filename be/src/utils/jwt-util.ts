@@ -6,6 +6,10 @@ const secret = "secret";
 const ACCESS_TOKEN_EXPIRATION = process.env.ACCESS_TOKEN_EXPIRATION || "1m";
 const REFRESH_TOKEN_EXPIRATION = process.env.REFRESH_TOKEN_EXPITION || "7d";
 
+interface JwtPayload {
+	userId: number;
+}
+
 const JwtUtil = {
 	generateAccessToken: (userId: number) => {
 		const payload = { userId };
@@ -38,7 +42,7 @@ const JwtUtil = {
 					"userId" in decoded &&
 					typeof decoded.userId === "number"
 				) {
-					resolve(decoded.userId as any as number);
+					resolve((decoded as JwtPayload).userId);
 				}
 				reject(new InvalidTokenError());
 			});

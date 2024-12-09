@@ -3,6 +3,10 @@
 		"module": "commonjs",
 		"target": "ES6",
 		"esModuleInterop": true,
+		"baseUrl": "./",
+		"paths": {
+			"@/*": ["src/*"]
+		},
 
 		"outDir": "./dist",
 		"rootDir": "./src",
@@ -21,7 +25,9 @@
 		"useUnknownInCatchVariables": true,
 		"strictBindCallApply": true,
 		"allowUnusedLabels": false,
-		"allowUnreachableCode": false
+		"allowUnreachableCode": false,
+
+		"typeRoots": ["./node_modules/@types", "./src/types"]
 	},
 	"exclude": ["**/*.test.ts", "jest.*"]
 }
