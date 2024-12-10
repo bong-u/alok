@@ -7,6 +7,11 @@ interface DateAttendee {
 	attendeeId: number;
 }
 
+export interface DateBase {
+	id: number;
+	date: string;
+}
+
 export interface DateAndRecords {
 	id: number;
 	records: Record[];

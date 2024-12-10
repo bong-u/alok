@@ -39,6 +39,18 @@ export class AttendeeNotFoundError extends Error {
 	}
 }
 
+export class AttendeeExceedsMaxError extends Error {
+	constructor() {
+		super("5명 이상의 참여자를 추가할 수 없습니다.");
+	}
+}
+
+export class AttendeeAlreadyExistsError extends Error {
+	constructor() {
+		super("이미 참여자로 추가되어 있습니다.");
+	}
+}
+
 export class RecaptchaScoreTooLowError extends Error {
 	constructor() {
 		super("Recaptcha score too low");

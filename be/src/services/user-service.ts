@@ -1,5 +1,5 @@
-import { PrismaClient } from "@prisma/client";
-import { UserResponse } from "../types/user-types";
+import { UserResponse, TokenResponse } from "../types/user-types";
+import UserRepository from "../repositories/user-repository";
 import {
 	UserNotFoundError,
 	UserAuthenticationFailedError,
@@ -8,35 +8,55 @@ import {
 	RecaptchaTokenInvalidError,
 } from "../exceptions";
 import bcrypt from "bcrypt";
+import TokenService from "./token-service";
 
-const prisma = new PrismaClient();
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS || "10");
 
 class UserService {
+	static async getUserById(userId: number): Promise<UserResponse> {
+		const user = await UserRepository.getUserById(userId);
+		if (!user) {
+			throw new UserNotFoundError();
+		}
+		return user;
+	}
+
+	static async getAllUsers(): Promise<UserResponse[]> {
+		return UserRepository.getAllUsers();
+	}
+
 	static async authenticateByUsername(
 		username: string,
 		password: string
-	): Promise<number> {
-		// without soft deleted user
-		const user = await prisma.user.findUnique({
-			where: { username, isDeleted: false },
-		});
+	): Promise<TokenResponse> {
+		const user = await UserRepository.getUserByUsername(username);
 		if (!user || !bcrypt.compareSync(password, user.password)) {
 			throw new UserAuthenticationFailedError();
 		}
-		return user.id;
+
+		return {
+			accessToken: TokenService.generateAccessToken(user.id),
+			refreshToken: TokenService.generateRefreshToken(user.id),
+		} as TokenResponse;
 	}
 
 	static async authenticateById(
 		userId: number,
 		password: string
 	): Promise<void> {
-		const user = await prisma.user.findUnique({
-			where: { id: userId, isDeleted: false },
-		});
+		const user = await UserRepository.getUserById(userId);
 		if (!user || !bcrypt.compareSync(password, user.password)) {
 			throw new UserAuthenticationFailedError();
 		}
+	}
+
+	static async userSignup(
+		username: string,
+		password: string,
+		recaptchaToken: string
+	): Promise<void> {
+		await UserService.verifyRecaptcha(recaptchaToken);
+		await UserService.createUser(username, password);
 	}
 
 	static async verifyRecaptcha(token: string): Promise<void> {
@@ -64,56 +84,48 @@ class UserService {
 		username: string,
 		password: string
 	): Promise<number> {
-		const existingUser = await prisma.user.findUnique({
-			where: { username: username, isDeleted: false },
-		});
+		const existingUser = await UserRepository.getUserByUsername(username);
 		if (existingUser) {
 			throw new UserAlreadyExistsError();
 		}
 
 		const hashedPassword = bcrypt.hashSync(password, SALT_ROUNDS);
-		return await prisma.user
-			.create({
-				data: {
-					username,
-					password: hashedPassword,
-				},
-			})
-			.then((user) => user.id);
+		return (await UserRepository.createUser(username, hashedPassword)).id;
 	}
 
-	static async getAllUsers(): Promise<UserResponse[]> {
-		return await prisma.user.findMany({
-			select: { id: true, username: true },
-			where: { isDeleted: false },
-		});
+	static async addTokensToBlacklist(
+		accessToken: string,
+		refreshToken: string
+	) {
+		TokenService.addToBlacklist(accessToken);
+		TokenService.addToBlacklist(refreshToken);
 	}
 
-	static async getUserById(userId: number): Promise<UserResponse> {
-		const user = await prisma.user.findUnique({
-			where: { id: userId, isDeleted: false },
-		});
-		if (!user) throw new UserNotFoundError();
-		return user;
+	static async refreshToken(refreshToken: string): Promise<string> {
+		const userId = await TokenService.getUserIdFromToken(refreshToken);
+		const accessToken = TokenService.generateAccessToken(userId);
+		return accessToken;
 	}
 
-	static async changePassword(userId: number, newPassword: string) {
+	static async changePassword(
+		userId: number,
+		oldPassword: string,
+		newPassword: string
+	) {
+		await UserService.authenticateById(userId, oldPassword);
+
 		const hashedPassword = bcrypt.hashSync(newPassword, SALT_ROUNDS);
-		await prisma.user.update({
-			where: { id: userId, isDeleted: false },
-			data: {
-				password: hashedPassword,
-				updatedAt: new Date().toISOString(),
-			},
-		});
-		return true;
+		await UserRepository.changePassword(userId, hashedPassword);
 	}
 
-	static async deleteUser(userId: number): Promise<void> {
-		await prisma.user.update({
-			where: { id: userId },
-			data: { isDeleted: true },
-		});
+	static async deleteUser(
+		accessToken: string,
+		refreshToken: string,
+		userId: number
+	): Promise<void> {
+		await UserService.addTokensToBlacklist(accessToken, refreshToken);
+		await UserService.getUserById(userId);
+		await UserRepository.deleteUser(userId);
 	}
 }
 

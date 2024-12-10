@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import jwtUtil from "../utils/jwt-util";
-import redis from "../redis";
 import { InvalidTokenError, TokenBlacklistedError } from "../exceptions";
+import BlacklistRepository from "../repositories/blacklist-repository";
 
 class TokenService {
 	static generateAccessToken(userId: number): string {
@@ -13,18 +13,14 @@ class TokenService {
 		return refreshToken;
 	}
 
-	private static async isTokenBlacklisted(token: string): Promise<boolean> {
-		return !!(await redis.get(`blacklist:${token}`));
-	}
-
 	static async getUserIdFromToken(token: string): Promise<number> {
-		if (await this.isTokenBlacklisted(token)) {
+		if (await BlacklistRepository.isExists(token)) {
 			throw new TokenBlacklistedError();
 		}
 		return await jwtUtil.getUserIdFromToken(token);
 	}
 
-	static addToBlacklist(token: string) {
+	static async addToBlacklist(token: string): Promise<void> {
 		const decoded = jwt.decode(token) as { exp?: number } | null;
 
 		if (!decoded || !decoded.exp) {
@@ -36,7 +32,7 @@ class TokenService {
 
 		if (expiresIn > 0) {
 			// 만료 시간만큼 블랙리스트에 추가
-			redis.set(`blacklist:${token}`, "true", "EX", expiresIn);
+			await BlacklistRepository.add(token, expiresIn);
 		}
 	}
 }

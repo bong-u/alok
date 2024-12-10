@@ -5,33 +5,23 @@ import {
 	RecordsGroupedByPeriod,
 } from "../types/record-types";
 import { RecordNotFoundError, RecordAlreadyExistsError } from "../exceptions";
+import RecordRepository from "../repositories/record-repository";
+import UserService from "./user-service";
+import DateService from "./date-service";
 
 const prisma = new PrismaClient();
 
 class RecordService {
-	static async getRecordsByMonth(
+	static async getRecordsGroupedByDay(
 		year: number,
 		month: number,
 		userId: number
 	): Promise<RecordsGroupedByPeriod> {
-		const formattedMonth = month < 10 ? `0${month}` : `${month}`; // 1자리 월을 2자리로 변환
-		const yearMonthPrefix = `${year}-${formattedMonth}`; // "YYYY-MM" 형식 생성
-
-		// Prisma 쿼리
-		const records = await prisma.record.findMany({
-			where: {
-				userId, // 사용자 ID 필터링
-				date: {
-					date: {
-						startsWith: yearMonthPrefix, // "YYYY-MM"으로 시작하는 날짜 필터링
-					},
-				},
-			},
-			include: {
-				date: true, // 관련 `Date` 모델의 데이터 포함
-			},
-		});
-
+		const records = await RecordRepository.getRecordsByMonth(
+			year,
+			month,
+			userId
+		);
 		// 결과를 월별로 그룹화
 		const groupedRecords = records.reduce((acc, record) => {
 			const dateKey = record.date.date; // `date.date`는 "YYYY-MM-DD" 형식
@@ -48,22 +38,11 @@ class RecordService {
 		return groupedRecords;
 	}
 
-	static async getRecordsByYear(
+	static async getRecordsGroupedByMonth(
 		year: number,
 		userId: number
 	): Promise<RecordsGroupedByPeriod> {
-		// 연도와 사용자 ID를 기준으로 날짜 정보를 포함하여 데이터 조회
-		const records = (await prisma.$queryRaw<MonthlyRecord[]>`
-			SELECT
-				TO_CHAR(d.date::DATE, 'MM') AS month, -- 월 추출
-				r.record_type AS "recordType",
-				SUM(r.amount) AS amount
-			FROM record r
-			JOIN date d ON r.date_id = d.id
-			WHERE TO_CHAR(d.date::DATE, 'YYYY') = ${year.toString()} -- 연도 필터링
-			  AND r.user_id = ${userId}                             -- 사용자 ID 필터링
-			GROUP BY TO_CHAR(d.date::DATE, 'MM'), r.record_type;
-		`) as MonthlyRecord[];
+		const records = await RecordRepository.getRecordsByYear(year, userId);
 
 		// 월별로 그룹화하여 반환
 		return records.reduce(
@@ -87,38 +66,25 @@ class RecordService {
 		recordType: string,
 		userId: number
 	): Promise<boolean> {
-		try {
-			await RecordService.getRecordIdByDateAndType(
-				dateId,
-				recordType,
-				userId
-			);
-			return true;
-		} catch (error) {
-			if (error instanceof RecordNotFoundError) {
-				return false;
-			}
-			throw error;
-		}
+		const recordId = await RecordRepository.getRecordIdByDateAndType(
+			dateId,
+			recordType,
+			userId
+		);
+		return recordId ? true : false;
 	}
 
-	static async getRecordIdByDateAndType(
-		dateId: number,
-		recordType: string,
+	static async getOtherUserRecordsGroupedByDay(
+		year: number,
+		month: number,
 		userId: number
-	): Promise<number> {
-		const record = await prisma.record.findFirst({
-			where: {
-				dateId,
-				recordType,
-				userId,
-			},
-			select: { id: true },
-		});
+	): Promise<RecordsGroupedByPeriod> {
+		const [, records] = await Promise.all([
+			UserService.getUserById(userId),
+			RecordService.getRecordsGroupedByDay(year, month, userId),
+		]);
 
-		if (!record?.id) throw new RecordNotFoundError();
-
-		return record!.id;
+		return records;
 	}
 
 	static async createRecord(
@@ -180,6 +146,30 @@ class RecordService {
 				id: recordId,
 			},
 		});
+	}
+
+	static async deleteRecord(
+		date: string,
+		recordType: string,
+		userId: number
+	) {
+		const dateObj = await DateService.getDateAndRecords(date, userId);
+		const recordId = await RecordRepository.getRecordIdByDateAndType(
+			dateObj.id,
+			recordType,
+			userId
+		);
+
+		if (!recordId) throw new RecordNotFoundError();
+
+		// 해당 date의 마지막 record인 경우 date 삭제 -> record 삭제 (cascade)
+		if (dateObj.records.length === 1) {
+			await DateService.deleteDateById(dateObj.id);
+		}
+		// record만 삭제
+		else {
+			await RecordRepository.deleteRecordById(recordId);
+		}
 	}
 }
 
