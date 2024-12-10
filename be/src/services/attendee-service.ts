@@ -3,7 +3,7 @@ import {
 	AttendeeExceedsMaxError,
 	AttendeeAlreadyExistsError,
 } from "../exceptions";
-import { AttendeeResponse } from "../types/attendee-types";
+import { AttendeeDTO } from "../types/attendee-types";
 import AttendeeRepository from "../repositories/attendee-repository";
 import DateService from "./date-service";
 
@@ -12,7 +12,7 @@ class AttendeeService {
 		date: string,
 		attendeeName: string,
 		partnerUserId: number
-	): Promise<AttendeeResponse> {
+	): Promise<AttendeeDTO> {
 		let attendee = null;
 		attendee = await AttendeeRepository.getAttendeeByName(
 			attendeeName,
@@ -42,16 +42,14 @@ class AttendeeService {
 		return attendee;
 	}
 
-	static async getFriends(
-		partnerUserId: number
-	): Promise<AttendeeResponse[]> {
+	static async getFriends(partnerUserId: number): Promise<AttendeeDTO[]> {
 		return await AttendeeRepository.getFriends(partnerUserId);
 	}
 
 	static async getAttendeesByDate(
 		date: string,
 		partnerUserId: number
-	): Promise<AttendeeResponse[]> {
+	): Promise<AttendeeDTO[]> {
 		const dateId = await DateService.getDateId(date);
 
 		return await AttendeeRepository.getAttendeesByDateId(
@@ -64,7 +62,7 @@ class AttendeeService {
 		date: string,
 		attendeeName: string,
 		userId: number
-	) {
+	): Promise<void> {
 		const [attendee, dateId] = await Promise.all([
 			AttendeeService.getAttendeeByName(attendeeName, userId),
 			DateService.getDateId(date),
@@ -79,7 +77,7 @@ class AttendeeService {
 	private static async getAttendeeByName(
 		name: string,
 		partnerUserId: number
-	): Promise<AttendeeResponse> {
+	): Promise<AttendeeDTO> {
 		const attendee = await AttendeeRepository.getAttendeeByName(
 			name,
 			partnerUserId

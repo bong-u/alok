@@ -1,15 +1,15 @@
-interface Record {
-	id: number;
-}
-
-interface DateAttendee {
+export interface DateAttendeeDTO {
 	dateId: number;
 	attendeeId: number;
 }
 
-export interface DateBase {
+export interface DateDTO {
 	id: number;
 	date: string;
+}
+
+interface Record {
+	id: number;
 }
 
 export interface DateAndRecords {
@@ -19,5 +19,5 @@ export interface DateAndRecords {
 
 export interface DateAndAttendees {
 	id: number;
-	dateAttendees: DateAttendee[];
+	dateAttendees: DateAttendeeDTO[];
 }

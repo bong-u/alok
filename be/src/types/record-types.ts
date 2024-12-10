@@ -1,14 +1,22 @@
 export const recordTypeValues = ["soju", "beer"] as const;
 type RecordType = (typeof recordTypeValues)[number];
 
-export interface BaseRecord {
+interface BaseRecord {
 	recordType: RecordType;
 	amount: number;
 }
 
-export interface DailyRecord extends BaseRecord {
+export interface RecordWithDate {
 	id: number;
-	date: string;
+	amount: number;
+	recordType: string;
+	date: {
+		date: string;
+	};
+}
+
+export interface RecordDTO extends BaseRecord {
+	id: number;
 }
 
 export interface MonthlyRecord extends BaseRecord {

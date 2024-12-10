@@ -1,44 +1,23 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { randomBytes } from "crypto";
+import { RecordDTO } from "../types/record-types";
+import { DateDTO, DateAttendeeDTO } from "../types/date-types";
+import { AttendeeDTO } from "../types/attendee-types";
 
 const prisma = new PrismaClient();
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS || "10");
 
-interface DateResult {
-	id: number;
-	date: string;
-}
+const generateRandomString = (): string => {
+	return randomBytes(5).toString("hex");
+};
 
-interface RecordResult {
-	id: number;
-	dateId: number;
-	recordType: string;
-	amount: number;
-	userId: number;
-}
-
-interface UserResult {
+export interface UserResult {
 	id: number;
 	username: string;
 	hashedPassword: string;
 	plainPassword: string;
 }
-
-interface AttendeeResult {
-	id: number;
-	name: string;
-	partnerUserId: number;
-}
-
-interface AttendeeDateResult {
-	attendeeId: number;
-	dateId: number;
-}
-
-const generateRandomString = (): string => {
-	return randomBytes(5).toString("hex");
-};
 
 export const TestUtil = {
 	async createUser(isDeleted: boolean = false): Promise<UserResult> {
@@ -71,7 +50,7 @@ export const TestUtil = {
 		return bcrypt.compare(password, hashedPassword);
 	},
 
-	async createDate(date: string): Promise<DateResult> {
+	async createDate(date: string): Promise<DateDTO> {
 		return await prisma.date.create({
 			data: {
 				date,
@@ -84,33 +63,33 @@ export const TestUtil = {
 		recordType: string,
 		amount: number,
 		userId: number
-	): Promise<RecordResult> {
-		return await prisma.record.create({
+	): Promise<RecordDTO> {
+		return (await prisma.record.create({
 			data: {
 				dateId,
 				recordType,
 				amount,
 				userId,
 			},
-		});
+		})) as RecordDTO;
 	},
 
 	async createAttendee(
 		attendeeName: string,
 		userId: number
-	): Promise<AttendeeResult> {
-		return (await prisma.attendee.create({
+	): Promise<AttendeeDTO> {
+		return await prisma.attendee.create({
 			data: {
 				name: attendeeName,
 				partnerUserId: userId,
 			},
-		})) as AttendeeResult;
+		});
 	},
 
 	async connectAttendeeToDate(
 		attendeeId: number,
 		dateId: number
-	): Promise<AttendeeDateResult> {
+	): Promise<DateAttendeeDTO> {
 		return await prisma.dateAttendee.create({
 			data: {
 				dateId,

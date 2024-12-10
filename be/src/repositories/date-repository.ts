@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import {
-	DateBase,
+	DateDTO,
 	DateAndRecords,
 	DateAndAttendees,
 } from "../types/date-types";
@@ -8,7 +8,7 @@ import {
 const prisma = new PrismaClient();
 
 class DateRepository {
-	static async createDate(date: string) {
+	static async createDate(date: string): Promise<DateDTO> {
 		return await prisma.date.create({
 			data: {
 				date,
@@ -57,7 +57,7 @@ class DateRepository {
 		});
 	}
 
-	static async getDateId(date: string): Promise<DateBase | null> {
+	static async getDateId(date: string): Promise<DateDTO | null> {
 		return await prisma.date.findUnique({
 			where: {
 				date,
@@ -65,7 +65,7 @@ class DateRepository {
 		});
 	}
 
-	static async deleteDateById(dateId: number) {
+	static async deleteDateById(dateId: number): Promise<DateDTO> {
 		return await prisma.date.delete({
 			where: {
 				id: dateId,

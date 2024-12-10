@@ -1,9 +1,10 @@
-interface UserBase {
+export interface UserDTO {
 	username: string;
+	id: number;
 }
 
-export interface UserResponse extends UserBase {
-	id: number;
+export interface UserDTOWithPassword extends UserDTO {
+	password: string;
 }
 
 export interface TokenResponse {

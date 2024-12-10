@@ -1,9 +1,9 @@
 import { DateNotFoundError } from "../exceptions";
-import { DateAndRecords, DateAndAttendees } from "../types/date-types";
+import { DateDTO, DateAndRecords, DateAndAttendees } from "../types/date-types";
 import DateRepository from "../repositories/date-repository";
 
 class DateService {
-	static async createDate(date: string) {
+	static async createDate(date: string): Promise<DateDTO> {
 		return await DateRepository.createDate(date);
 	}
 
@@ -34,7 +34,7 @@ class DateService {
 		return dateObj.id;
 	}
 
-	static async deleteDateById(dateId: number) {
+	static async deleteDateById(dateId: number): Promise<DateDTO> {
 		return await DateRepository.deleteDateById(dateId);
 	}
 }

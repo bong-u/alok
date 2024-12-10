@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import {
-	DailyRecord,
+	RecordDTO,
 	MonthlyRecord,
 	RecordsGroupedByPeriod,
 } from "../types/record-types";
@@ -31,7 +31,7 @@ class RecordService {
 			acc[dateKey].push({
 				recordType: record.recordType,
 				amount: record.amount,
-			} as DailyRecord);
+			} as RecordDTO);
 			return acc;
 		}, {} as RecordsGroupedByPeriod);
 
@@ -88,31 +88,27 @@ class RecordService {
 	}
 
 	static async createRecord(
-		record: DailyRecord,
+		recordType: string,
+		amount: number,
 		date: string,
 		userId: number
 	): Promise<void> {
 		await prisma.$transaction(async (tx) => {
-			let dateId: number;
-			const existingDate = await tx.date.findUnique({
+			let dateObj = await tx.date.findUnique({
 				where: { date },
 			});
 
-			// 이미 있는 날짜인 경우
-			if (existingDate) {
-				dateId = existingDate.id;
-			} else {
-				// 없는 날짜인 경우
-				const newDate = await tx.date.create({
+			// 없는 날짜인 경우
+			if (!dateObj) {
+				dateObj = await tx.date.create({
 					data: { date },
 				});
-				dateId = newDate.id;
 			}
 
 			const existingRecord = await tx.record.findFirst({
 				where: {
-					dateId,
-					recordType: record.recordType,
+					dateId: dateObj.id,
+					recordType,
 					userId,
 				},
 			});
@@ -123,11 +119,11 @@ class RecordService {
 
 			await tx.record.create({
 				data: {
-					recordType: record.recordType,
-					amount: record.amount,
+					recordType,
+					amount,
 					date: {
 						connect: {
-							id: dateId,
+							id: dateObj.id,
 						},
 					},
 					user: {
@@ -152,7 +148,7 @@ class RecordService {
 		date: string,
 		recordType: string,
 		userId: number
-	) {
+	): Promise<void> {
 		const dateObj = await DateService.getDateAndRecords(date, userId);
 		const recordId = await RecordRepository.getRecordIdByDateAndType(
 			dateObj.id,

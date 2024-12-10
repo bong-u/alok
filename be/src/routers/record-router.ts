@@ -1,5 +1,4 @@
 import { Request, Router, Response } from "express";
-import { DailyRecord } from "../types/record-types";
 import {
 	recordSchema,
 	getRecordsSchema,
@@ -94,7 +93,8 @@ const recordRouter = () => {
 			try {
 				await UserService.getUserById(userId);
 				await RecordService.createRecord(
-					{ recordType, amount } as DailyRecord,
+					recordType,
+					amount,
 					date,
 					userId
 				);

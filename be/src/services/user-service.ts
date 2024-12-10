@@ -1,4 +1,4 @@
-import { UserResponse, TokenResponse } from "../types/user-types";
+import { UserDTO, TokenResponse } from "../types/user-types";
 import UserRepository from "../repositories/user-repository";
 import {
 	UserNotFoundError,
@@ -13,7 +13,7 @@ import TokenService from "./token-service";
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS || "10");
 
 class UserService {
-	static async getUserById(userId: number): Promise<UserResponse> {
+	static async getUserById(userId: number): Promise<UserDTO> {
 		const user = await UserRepository.getUserById(userId);
 		if (!user) {
 			throw new UserNotFoundError();
@@ -21,7 +21,7 @@ class UserService {
 		return user;
 	}
 
-	static async getAllUsers(): Promise<UserResponse[]> {
+	static async getAllUsers(): Promise<UserDTO[]> {
 		return UserRepository.getAllUsers();
 	}
 
@@ -96,7 +96,7 @@ class UserService {
 	static async addTokensToBlacklist(
 		accessToken: string,
 		refreshToken: string
-	) {
+	): Promise<void> {
 		TokenService.addToBlacklist(accessToken);
 		TokenService.addToBlacklist(refreshToken);
 	}
@@ -111,7 +111,7 @@ class UserService {
 		userId: number,
 		oldPassword: string,
 		newPassword: string
-	) {
+	): Promise<void> {
 		await UserService.authenticateById(userId, oldPassword);
 
 		const hashedPassword = bcrypt.hashSync(newPassword, SALT_ROUNDS);

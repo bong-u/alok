@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { AttendeeResponse } from "../types/attendee-types";
+import { AttendeeDTO } from "../types/attendee-types";
 
 const prisma = new PrismaClient();
 
@@ -7,7 +7,7 @@ class AttendeeRepository {
 	static async createAttendee(
 		name: string,
 		partnerUserId: number
-	): Promise<AttendeeResponse> {
+	): Promise<AttendeeDTO> {
 		return await prisma.attendee.create({
 			data: {
 				name,
@@ -35,7 +35,7 @@ class AttendeeRepository {
 	static async getAttendeeByName(
 		name: string,
 		partnerUserId: number
-	): Promise<AttendeeResponse | null> {
+	): Promise<AttendeeDTO | null> {
 		return await prisma.attendee.findFirst({
 			where: {
 				name,
@@ -50,7 +50,7 @@ class AttendeeRepository {
 
 	static async getFriends(
 		partnerUserId: number
-	): Promise<AttendeeResponse[]> {
+	): Promise<AttendeeDTO[]> {
 		const attendees = await prisma.attendee.findMany({
 			where: {
 				partnerUserId,
@@ -66,7 +66,7 @@ class AttendeeRepository {
 	static async getAttendeesByDateId(
 		dateId: number,
 		partnerUserId: number
-	): Promise<AttendeeResponse[]> {
+	): Promise<AttendeeDTO[]> {
 		return await prisma.attendee.findMany({
 			where: {
 				partnerUserId,

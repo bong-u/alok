@@ -1,17 +1,12 @@
 import { PrismaClient } from "@prisma/client";
-import { DailyRecord, MonthlyRecord } from "../types/record-types";
+import {
+	RecordWithDate,
+	RecordDTO,
+	MonthlyRecord,
+} from "../types/record-types";
 import { RecordAlreadyExistsError } from "../exceptions";
 
 const prisma = new PrismaClient();
-
-interface RecordWithDate {
-	id: number;
-	amount: number;
-	recordType: string;
-	date: {
-		date: string;
-	};
-}
 
 class RecordRepository {
 	static async getRecordsByMonth(
@@ -72,7 +67,7 @@ class RecordRepository {
 	}
 
 	static async createRecord(
-		record: DailyRecord,
+		record: RecordDTO,
 		date: string,
 		userId: number
 	): Promise<void> {
