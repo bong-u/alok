@@ -3,9 +3,9 @@ import {
 	AttendeeExceedsMaxError,
 	AttendeeAlreadyExistsError,
 } from "../exceptions";
-import { AttendeeDTO } from "../types/attendee-types";
-import AttendeeRepository from "../repositories/attendee-repository";
-import DateService from "./date-service";
+import { AttendeeDTO } from "../types/attendee.types";
+import AttendeeRepository from "../repositories/attendee.repository";
+import DateService from "../services/date.service";
 
 class AttendeeService {
 	static async createAttendee(

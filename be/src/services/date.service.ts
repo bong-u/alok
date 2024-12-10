@@ -1,6 +1,6 @@
 import { DateNotFoundError } from "../exceptions";
-import { DateDTO, DateAndRecords, DateAndAttendees } from "../types/date-types";
-import DateRepository from "../repositories/date-repository";
+import { DateDTO, DateAndRecords, DateAndAttendees } from "../types/date.types";
+import DateRepository from "../repositories/date.repository";
 
 class DateService {
 	static async createDate(date: string): Promise<DateDTO> {

@@ -1,17 +1,17 @@
 import { Request, Router, Response } from "express";
-import AttendeeService from "../services/attendee-service";
+import AttendeeService from "../services/attendee.service";
 import {
 	DateNotFoundError,
 	AttendeeNotFoundError,
 	AttendeeExceedsMaxError,
 	AttendeeAlreadyExistsError,
 } from "../exceptions";
-import validationMiddleware from "../middlewares/validation-middleware";
+import validationMiddleware from "../middlewares/validation.middleware";
 import {
 	createAttendeeSchema,
 	getAttendeeSchema,
 	deleteAttendeeSchema,
-} from "../schemas/attendee-schemas";
+} from "../schemas/attendee.schemas";
 
 const attendeeRouter = () => {
 	const router = Router();

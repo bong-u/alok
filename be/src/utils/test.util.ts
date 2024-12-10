@@ -1,9 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { randomBytes } from "crypto";
-import { RecordDTO } from "../types/record-types";
-import { DateDTO, DateAttendeeDTO } from "../types/date-types";
-import { AttendeeDTO } from "../types/attendee-types";
+import { RecordDTO } from "../types/record.types";
+import { DateDTO, DateAttendeeDTO } from "../types/date.types";
+import { AttendeeDTO } from "../types/attendee.types";
 
 const prisma = new PrismaClient();
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS || "10");

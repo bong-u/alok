@@ -9,10 +9,10 @@ import {
 	expect,
 } from "@jest/globals";
 import express from "express";
-import userRouter from "../src/routers/user-router";
+import userRouter from "../src/routers/user.router";
 import redis from "../src/redis";
-import TokenService from "../src/services/token-service";
-import TestUtil from "../src/utils/test-util";
+import TokenService from "../src/services/token.service";
+import TestUtil from "../src/utils/test.util";
 
 const prisma = new PrismaClient();
 const TEST_RECAPTCHA_TOKEN = "test";

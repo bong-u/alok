@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { UserDTO, UserDTOWithPassword } from "../types/user-types";
+import { UserDTO, UserDTOWithPassword } from "../types/user.types";
 
 const prisma = new PrismaClient();
 
@@ -12,7 +12,9 @@ class UserRepository {
 		});
 	}
 
-	static async getUserById(userId: number): Promise<UserDTOWithPassword | null> {
+	static async getUserById(
+		userId: number
+	): Promise<UserDTOWithPassword | null> {
 		return await prisma.user.findUnique({
 			where: { id: userId, isDeleted: false },
 		});

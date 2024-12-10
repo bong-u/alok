@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { AttendeeDTO } from "../types/attendee-types";
+import { AttendeeDTO } from "../types/attendee.types";
 
 const prisma = new PrismaClient();
 

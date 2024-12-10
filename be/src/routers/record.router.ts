@@ -3,10 +3,10 @@ import {
 	recordSchema,
 	getRecordsSchema,
 	deleteRecordRequestSchema,
-} from "../schemas/record-schemas";
-import RecordService from "../services/record-service";
-import UserService from "../services/user-service";
-import validationMiddleware from "../middlewares/validation-middleware";
+} from "../schemas/record.schemas";
+import RecordService from "../services/record.service";
+import UserService from "../services/user.service";
+import validationMiddleware from "../middlewares/validation.middleware";
 import {
 	UserNotFoundError,
 	RecordNotFoundError,

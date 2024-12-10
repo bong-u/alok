@@ -3,7 +3,7 @@ import {
 	DateDTO,
 	DateAndRecords,
 	DateAndAttendees,
-} from "../types/date-types";
+} from "../types/date.types";
 
 const prisma = new PrismaClient();
 

@@ -1,5 +1,5 @@
-import TokenService from "../services/token-service";
 import { Request, Response, NextFunction } from "express";
+import TokenService from "../services/token.service";
 import { InvalidTokenError, TokenBlacklistedError } from "../exceptions";
 
 const authMiddleware = async (

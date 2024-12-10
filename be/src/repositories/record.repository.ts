@@ -3,7 +3,7 @@ import {
 	RecordWithDate,
 	RecordDTO,
 	MonthlyRecord,
-} from "../types/record-types";
+} from "../types/record.types";
 import { RecordAlreadyExistsError } from "../exceptions";
 
 const prisma = new PrismaClient();

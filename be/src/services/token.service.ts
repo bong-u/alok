@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
-import jwtUtil from "../utils/jwt-util";
+import jwtUtil from "../utils/jwt.util";
 import { InvalidTokenError, TokenBlacklistedError } from "../exceptions";
-import BlacklistRepository from "../repositories/blacklist-repository";
+import BlacklistRepository from "../repositories/blacklist.repository";
 
 class TokenService {
 	static generateAccessToken(userId: number): string {

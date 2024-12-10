@@ -1,14 +1,14 @@
 import { Router, Request, Response } from "express";
-import UserService from "../services/user-service";
-import authMiddleware from "../middlewares/auth-middleware";
-import validationMiddleware from "../middlewares/validation-middleware";
+import UserService from "../services/user.service";
+import authMiddleware from "../middlewares/auth.middleware";
+import validationMiddleware from "../middlewares/validation.middleware";
 import {
 	loginSchema,
 	refreshTokenSchema,
 	terminateTokenSchema,
 	passwordChangeSchema,
 	signupSchema,
-} from "../schemas/user-schemas";
+} from "../schemas/user.schemas";
 import {
 	UserNotFoundError,
 	UserAuthenticationFailedError,

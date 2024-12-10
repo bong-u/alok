@@ -10,9 +10,9 @@ import {
 } from "@jest/globals";
 import request from "supertest";
 import express from "express";
-import recordRouter from "../src/routers/record-router";
-import authMiddleware from "../src/middlewares/auth-middleware";
-import jwtUtil from "../src/utils/jwt-util";
+import recordRouter from "../src/routers/record.router";
+import authMiddleware from "../src/middlewares/auth.middleware";
+import jwtUtil from "../src/utils/jwt.util";
 
 const prisma = new PrismaClient();
 

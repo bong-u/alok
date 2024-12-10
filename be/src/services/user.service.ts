@@ -1,5 +1,6 @@
-import { UserDTO, TokenResponse } from "../types/user-types";
-import UserRepository from "../repositories/user-repository";
+import bcrypt from "bcrypt";
+import { UserDTO, TokenResponse } from "../types/user.types";
+import UserRepository from "../repositories/user.repository";
 import {
 	UserNotFoundError,
 	UserAuthenticationFailedError,
@@ -7,8 +8,7 @@ import {
 	RecaptchaScoreTooLowError,
 	RecaptchaTokenInvalidError,
 } from "../exceptions";
-import bcrypt from "bcrypt";
-import TokenService from "./token-service";
+import TokenService from "../services/token.service";
 
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS || "10");
 

@@ -1,12 +1,12 @@
 import { PrismaClient } from "@prisma/client";
-import authMiddleware from "../src/middlewares/auth-middleware";
+import authMiddleware from "../src/middlewares/auth.middleware";
 import express from "express";
-import { describe, beforeEach, afterAll, it, expect } from "@jest/globals";
+import { describe, beforeAll, beforeEach, afterAll, it, expect } from "@jest/globals";
 import request from "supertest";
-import attendeeRouter from "../src/routers/attendee-router";
+import attendeeRouter from "../src/routers/attendee.router";
 import redis from "../src/redis";
-import JwtUtil from "../src/utils/jwt-util";
-import TestUtil from "../src/utils/test-util";
+import JwtUtil from "../src/utils/jwt.util";
+import TestUtil from "../src/utils/test.util";
 
 const prisma = new PrismaClient();
 

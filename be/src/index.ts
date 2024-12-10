@@ -1,10 +1,10 @@
 import "./env";
 import express from "express";
 import cors from "cors";
-import recordRouter from "./routers/record-router";
-import userRouter from "./routers/user-router";
-import attendeeRouter from "./routers/attendee-router";
-import authMiddleware from "./middlewares/auth-middleware";
+import recordRouter from "./routers/record.router";
+import userRouter from "./routers/user.router";
+import attendeeRouter from "./routers/attendee.router";
+import authMiddleware from "./middlewares/auth.middleware";
 import morgan from "morgan";
 const app = express();
 

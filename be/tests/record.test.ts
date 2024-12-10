@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import authMiddleware from "../src/middlewares/auth-middleware";
+import authMiddleware from "../src/middlewares/auth.middleware";
 import express from "express";
 import {
 	describe,
@@ -10,10 +10,10 @@ import {
 	expect,
 } from "@jest/globals";
 import request from "supertest";
-import recordRouter from "../src/routers/record-router";
+import recordRouter from "../src/routers/record.router";
 import redis from "../src/redis";
-import JwtUtil from "../src/utils/jwt-util";
-import TestUtil from "../src/utils/test-util";
+import JwtUtil from "../src/utils/jwt.util";
+import TestUtil from "../src/utils/test.util";
 
 const prisma = new PrismaClient();
 

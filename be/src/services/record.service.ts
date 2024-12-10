@@ -3,11 +3,11 @@ import {
 	RecordDTO,
 	MonthlyRecord,
 	RecordsGroupedByPeriod,
-} from "../types/record-types";
+} from "../types/record.types";
 import { RecordNotFoundError, RecordAlreadyExistsError } from "../exceptions";
-import RecordRepository from "../repositories/record-repository";
-import UserService from "./user-service";
-import DateService from "./date-service";
+import RecordRepository from "../repositories/record.repository";
+import UserService from "../services/user.service";
+import DateService from "../services/date.service";
 
 const prisma = new PrismaClient();
 
