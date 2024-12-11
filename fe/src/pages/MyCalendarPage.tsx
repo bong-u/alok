@@ -10,10 +10,9 @@ const MyCalendarPage: React.FC = () => {
 	const [selectedDate, setSelectedDate] = useState<string | null>(null);
 	const [activeDate, setActiveDate] = useState<Date>(new Date());
 	const [touchStartX, setTouchStartX] = useState<number | null>(null);
-	const [currentView, setCurrentView] = useState<View>(View.MONTH);
 
 	const fetchRecords = useCallback(
-		async (activeDate: Date, currentView: View) => {
+		async (activeDate: Date, currentView: View = View.MONTH) => {
 			if (currentView === View.MONTH) {
 				fetchRecordsByMonth(activeDate);
 			}
@@ -25,8 +24,8 @@ const MyCalendarPage: React.FC = () => {
 	);
 
 	useEffect(() => {
-		fetchRecords(activeDate, currentView);
-	}, [fetchRecords, activeDate, currentView]);
+		fetchRecords(new Date());
+	}, [fetchRecords]);
 
 	const fetchRecordsByMonth = async (activeStartDate: Date) => {
 		const year = activeStartDate.getFullYear();
@@ -117,6 +116,7 @@ const MyCalendarPage: React.FC = () => {
 		view: string;
 	}) => {
 		activeStartDate && setActiveDate(activeStartDate);
+		fetchRecords(activeStartDate as Date, view as View);
 	};
 
 	return (
@@ -141,7 +141,6 @@ const MyCalendarPage: React.FC = () => {
 				onClickDay={handleClickDay}
 				activeStartDate={activeDate}
 				onActiveStartDateChange={handleActiveStartDateChange}
-				onViewChange={({ view }) => setCurrentView(view as View)}
 			/>
 		</div>
 	);
