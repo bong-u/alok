@@ -81,9 +81,7 @@ const UserCalendarPage: React.FC = () => {
 			<MyCalendar
 				records={records}
 				tileContent={getTileContent}
-				onClickDay={() => { }}
 				activeStartDate={activeDate}
-				onActiveStartDateChange={() => { }}
 				showNavigation={false}
 				tileDisabled={() => true}
 			/>

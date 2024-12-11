@@ -7,26 +7,27 @@ import { RecordsByPeriod } from "../types";
 interface MyCalendarProps {
 	records: RecordsByPeriod;
 	tileContent: (args: { date: Date; view: string }) => React.ReactNode;
-	onClickDay: (value: Date) => void;
 	activeStartDate: Date;
-	onActiveStartDateChange: (args: {
-		action: string;
-		activeStartDate: Date | null;
-		value: any;
-		view: string;
-	}) => void;
 	showNavigation?: boolean;
 	tileDisabled?: (args: { date: Date }) => boolean;
+	onViewChange?: (args: { view: string }) => void;
+	onClickDay?: (value: Date) => void;
+	onActiveStartDateChange?: (args: {
+		action: string;
+		activeStartDate: Date | null;
+		view: string;
+	}) => void;
 }
 
 const MyCalendar: React.FC<MyCalendarProps> = ({
 	records,
 	tileContent,
-	onClickDay,
 	activeStartDate,
-	onActiveStartDateChange,
 	showNavigation = true,
 	tileDisabled = () => false,
+	onViewChange = () => {},
+	onClickDay = () => {},
+	onActiveStartDateChange = () => {},
 }) => {
 	return (
 		<Calendar
@@ -42,6 +43,8 @@ const MyCalendar: React.FC<MyCalendarProps> = ({
 			showNavigation={showNavigation}
 			prevLabel="◀"
 			nextLabel="▶"
+			tileDisabled={tileDisabled}
+			onViewChange={onViewChange}
 		/>
 	);
 };

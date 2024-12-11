@@ -1,36 +1,37 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import MyCalendar from "../components/MyCalendar";
 import RecordIcon from "../components/RecordIcon";
 import ManageRecordModal from "../components/ManageRecordModal";
 import { RecordType, RecordsByPeriod } from "../types";
 import api from "../api";
 
-const enum LastAction {
-	PREV = "prev",
-	NEXT = "next",
-	DRILL_UP = "drillUp",
-	DRILL_DOWN = "drillDown",
+const enum View {
+	MONTH = "month",
+	YEAR = "year",
 }
 
 const MyCalendarPage: React.FC = () => {
 	const [records, setRecords] = useState<RecordsByPeriod>({});
 	const [selectedDate, setSelectedDate] = useState<string | null>(null);
 	const [activeDate, setActiveDate] = useState<Date>(new Date());
-	const [lastAction, setLastAction] = useState<LastAction | null>(null);
 	const [touchStartX, setTouchStartX] = useState<number | null>(null);
+	const [currentView, setCurrentView] = useState<View>(View.MONTH);
+
+	const fetchRecords = useCallback(
+		async (activeDate: Date, currentView: View) => {
+			if (currentView === View.MONTH) {
+				fetchRecordsByMonth(activeDate);
+			}
+			if (currentView === View.YEAR) {
+				fetchRecordsByYear(activeDate);
+			}
+		},
+		[]
+	);
 
 	useEffect(() => {
-		if (
-			lastAction === null ||
-			lastAction === LastAction.PREV ||
-			lastAction === LastAction.NEXT ||
-			lastAction === LastAction.DRILL_DOWN
-		) {
-			fetchRecordsByMonth(activeDate);
-		} else if (lastAction === LastAction.DRILL_UP) {
-			fetchRecordsByYear(activeDate);
-		}
-	}, [activeDate, lastAction]);
+		fetchRecords(activeDate, currentView);
+	}, [fetchRecords, activeDate, currentView]);
 
 	const fetchRecordsByMonth = async (activeStartDate: Date) => {
 		const year = activeStartDate.getFullYear();
@@ -154,17 +155,13 @@ const MyCalendarPage: React.FC = () => {
 	const handleActiveStartDateChange = ({
 		action,
 		activeStartDate,
-		value,
 		view,
 	}: {
 		action: string;
 		activeStartDate: Date | null;
-		value: Date | Date[] | null;
 		view: string;
 	}) => {
-		if (!activeStartDate || !action) return;
-		setActiveDate(activeStartDate);
-		setLastAction(action as LastAction);
+		activeStartDate && setActiveDate(activeStartDate);
 	};
 
 	return (
@@ -189,6 +186,7 @@ const MyCalendarPage: React.FC = () => {
 				onClickDay={handleClickDay}
 				activeStartDate={activeDate}
 				onActiveStartDateChange={handleActiveStartDateChange}
+				onViewChange={({ view }) => setCurrentView(view as View)}
 			/>
 		</div>
 	);
