@@ -1,10 +1,5 @@
-import { PrismaClient } from "@prisma/client";
-import {
-	RecordWithDate,
-	RecordDTO,
-	MonthlyRecord,
-} from "../types/record.types";
-import { RecordAlreadyExistsError } from "../exceptions";
+import { Prisma, PrismaClient } from "@prisma/client";
+import { RecordWithDate, MonthlyRecord } from "../types/record.types";
 
 const prisma = new PrismaClient();
 
@@ -53,9 +48,12 @@ class RecordRepository {
 	static async getRecordIdByDateAndType(
 		dateId: number,
 		recordType: string,
-		userId: number
+		userId: number,
+		tx?: Prisma.TransactionClient
 	): Promise<number | null> {
-		const record = await prisma.record.findFirst({
+		const client = tx || prisma;
+
+		const record = await client.record.findFirst({
 			where: {
 				dateId,
 				recordType,
@@ -67,55 +65,28 @@ class RecordRepository {
 	}
 
 	static async createRecord(
-		record: RecordDTO,
-		date: string,
-		userId: number
+		dateId: number,
+		recordType: string,
+		amount: number,
+		userId: number,
+		tx?: Prisma.TransactionClient
 	): Promise<void> {
-		await prisma.$transaction(async (tx) => {
-			let dateId: number;
-			const existingDate = await tx.date.findUnique({
-				where: { date },
-			});
-
-			// 이미 있는 날짜인 경우
-			if (existingDate) {
-				dateId = existingDate.id;
-			} else {
-				// 없는 날짜인 경우
-				const newDate = await tx.date.create({
-					data: { date },
-				});
-				dateId = newDate.id;
-			}
-
-			const existingRecord = await tx.record.findFirst({
-				where: {
-					dateId,
-					recordType: record.recordType,
-					userId,
-				},
-			});
-
-			if (existingRecord) {
-				throw new RecordAlreadyExistsError();
-			}
-
-			await tx.record.create({
-				data: {
-					recordType: record.recordType,
-					amount: record.amount,
-					date: {
-						connect: {
-							id: dateId,
-						},
-					},
-					user: {
-						connect: {
-							id: userId,
-						},
+		const client = tx || prisma;
+		await client.record.create({
+			data: {
+				recordType: recordType,
+				amount: amount,
+				date: {
+					connect: {
+						id: dateId,
 					},
 				},
-			});
+				user: {
+					connect: {
+						id: userId,
+					},
+				},
+			},
 		});
 	}
 

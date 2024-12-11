@@ -8,6 +8,7 @@ import { RecordNotFoundError, RecordAlreadyExistsError } from "../exceptions";
 import RecordRepository from "../repositories/record.repository";
 import UserService from "../services/user.service";
 import DateService from "../services/date.service";
+import DateRepository from "../repositories/date.repository";
 
 const prisma = new PrismaClient();
 
@@ -22,7 +23,7 @@ class RecordService {
 			month,
 			userId
 		);
-		// 결과를 월별로 그룹화
+		// 결과를 날짜별로 그룹화하여 반환
 		const groupedRecords = records.reduce((acc, record) => {
 			const dateKey = record.date.date; // `date.date`는 "YYYY-MM-DD" 형식
 			if (!acc[dateKey]) {
@@ -44,7 +45,7 @@ class RecordService {
 	): Promise<RecordsGroupedByPeriod> {
 		const records = await RecordRepository.getRecordsByYear(year, userId);
 
-		// 월별로 그룹화하여 반환
+		// 결과를 월별로 그룹화하여 반환
 		return records.reduce(
 			(
 				acc: RecordsGroupedByPeriod,
@@ -93,46 +94,30 @@ class RecordService {
 		date: string,
 		userId: number
 	): Promise<void> {
+		// 트랜잭션 사용
 		await prisma.$transaction(async (tx) => {
-			let dateObj = await tx.date.findUnique({
-				where: { date },
-			});
+			// dateId를 조회, 없으면 생성
+			const dateId =
+				(await DateRepository.getDateId(date, tx)) ??
+				(await DateRepository.createDate(date, tx)).id;
 
-			// 없는 날짜인 경우
-			if (!dateObj) {
-				dateObj = await tx.date.create({
-					data: { date },
-				});
-			}
-
-			const existingRecord = await tx.record.findFirst({
-				where: {
-					dateId: dateObj.id,
+			const existingRecord =
+				await RecordRepository.getRecordIdByDateAndType(
+					dateId,
 					recordType,
-					userId,
-				},
-			});
+					userId
+				);
 
-			if (existingRecord) {
-				throw new RecordAlreadyExistsError();
-			}
+			// 이미 기록이 있는 경우
+			if (existingRecord) throw new RecordAlreadyExistsError();
 
-			await tx.record.create({
-				data: {
-					recordType,
-					amount,
-					date: {
-						connect: {
-							id: dateObj.id,
-						},
-					},
-					user: {
-						connect: {
-							id: userId,
-						},
-					},
-				},
-			});
+			await RecordRepository.createRecord(
+				dateId,
+				recordType,
+				amount,
+				userId,
+				tx
+			);
 		});
 	}
 

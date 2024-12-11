@@ -28,10 +28,10 @@ class DateService {
 	}
 
 	static async getDateId(date: string): Promise<number> {
-		const dateObj = await DateRepository.getDateId(date);
+		const dateId = await DateRepository.getDateId(date);
 
-		if (!dateObj) throw new DateNotFoundError();
-		return dateObj.id;
+		if (!dateId) throw new DateNotFoundError();
+		return dateId;
 	}
 
 	static async deleteDateById(dateId: number): Promise<DateDTO> {

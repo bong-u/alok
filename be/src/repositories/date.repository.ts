@@ -1,15 +1,15 @@
-import { PrismaClient } from "@prisma/client";
-import {
-	DateDTO,
-	DateAndRecords,
-	DateAndAttendees,
-} from "../types/date.types";
+import { Prisma, PrismaClient } from "@prisma/client";
+import { DateDTO, DateAndRecords, DateAndAttendees } from "../types/date.types";
 
 const prisma = new PrismaClient();
 
 class DateRepository {
-	static async createDate(date: string): Promise<DateDTO> {
-		return await prisma.date.create({
+	static async createDate(
+		date: string,
+		tx?: Prisma.TransactionClient
+	): Promise<DateDTO> {
+		const client = tx || prisma;
+		return await client.date.create({
 			data: {
 				date,
 			},
@@ -57,12 +57,17 @@ class DateRepository {
 		});
 	}
 
-	static async getDateId(date: string): Promise<DateDTO | null> {
-		return await prisma.date.findUnique({
+	static async getDateId(
+		date: string,
+		tx?: Prisma.TransactionClient
+	): Promise<number | null> {
+		const client = tx || prisma;
+		const dateObj = await client.date.findUnique({
 			where: {
 				date,
 			},
 		});
+		return dateObj ? dateObj.id : null;
 	}
 
 	static async deleteDateById(dateId: number): Promise<DateDTO> {
