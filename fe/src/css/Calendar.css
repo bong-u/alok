@@ -1,19 +1,9 @@
-.calendar {
-	width: 100%;
-	overflow: auto;
-}
-
 .react-calendar {
-	width: 100% !important;
 	border: 0 !important;
 }
 
-.react-calendar__viewContainer {
-	display: flex;
-}
-
 .react-calendar__navigation {
-	height: 37px;
+	height: 2rem;
 }
 
 .react-calendar__navigation__arrow,

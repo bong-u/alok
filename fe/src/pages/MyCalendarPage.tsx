@@ -125,7 +125,7 @@ const MyCalendarPage: React.FC = () => {
 
 	return (
 		<div
-			className="calendar box wide"
+			className="box wide"
 			onTouchStart={handleTouchStart}
 			onTouchEnd={handleTouchEnd}
 		>
