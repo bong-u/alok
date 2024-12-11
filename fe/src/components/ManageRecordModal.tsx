@@ -84,13 +84,17 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 		}
 
 		try {
-			const response = await api.post(`/attendees/${selectedDate}/${attendeeName}`);
+			const response = await api.post(
+				`/attendees/${selectedDate}/${attendeeName}`
+			);
 
 			console.info(response.data);
-		}
-		catch (error: any) {
+		} catch (error: any) {
 			// 403: 참여자 최대 인원 초과, 409: 이미 추가된 참여자
-			if (error.response.status === 403 || error.response.status === 409) {
+			if (
+				error.response.status === 403 ||
+				error.response.status === 409
+			) {
 				alert(error.response.data);
 				return;
 			}
@@ -103,10 +107,13 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 	};
 
 	const handleRemoveAttendee = async (attendeeName: string) => {
-		if (!window.confirm(`${attendeeName} 참여자를 삭제하시겠습니까?`)) return;
+		if (!window.confirm(`${attendeeName} 참여자를 삭제하시겠습니까?`))
+			return;
 
 		try {
-			const response = await api.delete(`/attendees/${selectedDate}/${attendeeName}`);
+			const response = await api.delete(
+				`/attendees/${selectedDate}/${attendeeName}`
+			);
 			console.info(response.data);
 		} catch (error: any) {
 			sessionStorage.setItem("error", error);
@@ -114,7 +121,7 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 		}
 
 		fetchAttendees();
-	}
+	};
 
 	return (
 		<div
@@ -204,18 +211,23 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 					</div>
 					{/* 참여자 목록 */}
 					<div className="tags">
-						{
-							Object.entries(attendees).map(([_, attendee]: [string, Attendee]) => (
-								<span key={attendee.id} className="tag is-dark is-size-6" onClick={() => handleRemoveAttendee(attendee.name)}>
+						{Object.entries(attendees).map(
+							([_, attendee]: [string, Attendee]) => (
+								<span
+									key={attendee.id}
+									className="tag is-dark is-size-6"
+									onClick={() =>
+										handleRemoveAttendee(attendee.name)
+									}
+								>
 									{attendee.name}
 								</span>
-							))
-						}
+							)
+						)}
 					</div>
-
 				</section>
 			</section>
-		</div >
+		</div>
 	);
 };
 
