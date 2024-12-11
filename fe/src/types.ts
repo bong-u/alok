@@ -25,3 +25,9 @@ export interface Attendee {
 	id: number;
 	name: string;
 }
+
+export const enum View {
+	MONTH = "month",
+	YEAR = "year",
+}
+

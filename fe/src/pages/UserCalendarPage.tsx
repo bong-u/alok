@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import MyCalendar from "../components/MyCalendar";
-import RecordIcon from "../components/RecordIcon";
-import { RecordType, RecordsByPeriod } from "../types";
+import { getRecordElements } from "../components/RecordElement";
+import { RecordsByPeriod } from "../types";
 import api from "../api";
 
 const UserCalendarPage: React.FC = () => {
@@ -39,38 +39,10 @@ const UserCalendarPage: React.FC = () => {
 		const formattedDate = stringDate;
 
 		if (formattedDate in records) {
-			return (
-				<div key={formattedDate}>
-					{records[formattedDate].map((record, index) => (
-						<div key={index}>
-							{getRecordElement(record.recordType, record.amount)}
-						</div>
-					))}
-				</div>
-			);
+			return getRecordElements(formattedDate, records[formattedDate]);
 		}
 
 		return null;
-	};
-
-	const getRecordElement = (recordType: RecordType, amount: number) => {
-		const elements = [];
-
-		if (amount === 0 || amount % 0.5 !== 0)
-			throw new Error(`${amount} is not a valid amount`);
-
-		// 한병(정수) 처리
-		for (let i = 0; i < Math.floor(amount); i++) {
-			elements.push(<RecordIcon key={i} recordType={recordType} />);
-		}
-		// 반병 처리
-		if (amount % 1 !== 0) {
-			elements.push(
-				<RecordIcon key={0.5} recordType={recordType} isHalf />
-			);
-		}
-
-		return elements;
 	};
 	return (
 		<div className="calendar">
