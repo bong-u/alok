@@ -59,24 +59,40 @@ const MyCalendarPage: React.FC = () => {
 		}
 	};
 
-	const getTileContent = ({ date }: { date: Date }) => {
+	const getTileContent = ({ date, view }: { date: Date; view: string }) => {
 		// 날짜 비교를 위해 Date -> String 형식으로 변환
 		const stringDate = date.toLocaleDateString("en-CA");
 		const formattedDate =
-			lastAction === LastAction.DRILL_UP
+			view === "year"
 				? stringDate.slice(0, 7) // 연도-월 형식으로 변환
 				: stringDate;
 
 		if (formattedDate in records) {
-			return (
-				<div key={formattedDate}>
-					{records[formattedDate].map((record, index) => (
-						<div key={index}>
-							{getRecordElement(record.recordType, record.amount)}
-						</div>
-					))}
-				</div>
-			);
+			if (view === "year") {
+				return (
+					<div key={formattedDate}>
+						{records[formattedDate].map((record, index) => (
+							<div key={index}>
+								{getRecordElement(record.recordType, 1)}X{" "}
+								{record.amount}
+							</div>
+						))}
+					</div>
+				);
+			} else {
+				return (
+					<div key={formattedDate}>
+						{records[formattedDate].map((record, index) => (
+							<div key={index}>
+								{getRecordElement(
+									record.recordType,
+									record.amount
+								)}
+							</div>
+						))}
+					</div>
+				);
+			}
 		}
 
 		return null;

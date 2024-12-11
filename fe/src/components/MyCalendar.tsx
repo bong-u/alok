@@ -6,7 +6,7 @@ import { RecordsByPeriod } from "../types";
 
 interface MyCalendarProps {
 	records: RecordsByPeriod;
-	tileContent: (args: { date: Date }) => React.ReactNode;
+	tileContent: (args: { date: Date; view: string }) => React.ReactNode;
 	onClickDay: (value: Date) => void;
 	activeStartDate: Date;
 	onActiveStartDateChange: (args: {
