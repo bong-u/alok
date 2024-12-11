@@ -93,25 +93,29 @@ const MyCalendarPage: React.FC = () => {
 
 		if (deltaX > 50) {
 			// 왼쪽 스와이프 -> 다음 달
-			setActiveDate(
-				new Date(activeDate.setMonth(activeDate.getMonth() + 1))
-			);
+			handleActiveStartDateChange({
+				activeStartDate: new Date(
+					activeDate.setMonth(activeDate.getMonth() + 1)
+				),
+				view: "month",
+			});
 		} else if (deltaX < -50) {
 			// 오른쪽 스와이프 -> 이전 달
-			setActiveDate(
-				new Date(activeDate.setMonth(activeDate.getMonth() - 1))
-			);
+			handleActiveStartDateChange({
+				activeStartDate: new Date(
+					activeDate.setMonth(activeDate.getMonth() - 1)
+				),
+				view: "month",
+			});
 		}
 
 		setTouchStartX(null);
 	};
 
 	const handleActiveStartDateChange = ({
-		action,
 		activeStartDate,
 		view,
 	}: {
-		action: string;
 		activeStartDate: Date | null;
 		view: string;
 	}) => {

@@ -13,7 +13,6 @@ interface MyCalendarProps {
 	onViewChange?: (args: { view: string }) => void;
 	onClickDay?: (value: Date) => void;
 	onActiveStartDateChange?: (args: {
-		action: string;
 		activeStartDate: Date | null;
 		view: string;
 	}) => void;
