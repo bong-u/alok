@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { RecordType, Record, RecordTypeInfo, Attendee } from "../types";
 import api from "../api";
+import Select from "react-select";
+
+interface OptionType {
+	value: string;
+	label: string;
+}
 
 interface ManageRecordModalProps {
 	selectedDate: string | null;
@@ -15,6 +21,7 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 }: ManageRecordModalProps) => {
 	const [attendeeName, setAttendeeName] = useState("");
 	const [attendees, setAttendees] = useState<Attendee[]>([]);
+	const [friends, setFriends] = useState<OptionType[]>([]);
 
 	const fetchAttendees = useCallback(async () => {
 		try {
@@ -30,6 +37,24 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 		if (!selectedDate) return;
 		fetchAttendees();
 	}, [fetchAttendees, selectedDate]);
+
+	useEffect(() => {
+		const fetchFriends = async () => {
+			try {
+				const response = await api.get("/attendees");
+				setFriends(
+					response.data.map((attendee: Attendee) => ({
+						value: attendee.name,
+						label: attendee.name,
+					}))
+				);
+			} catch (error: any) {
+				sessionStorage.setItem("error", error);
+				window.location.href = "/error";
+			}
+		};
+		fetchFriends();
+	}, []);
 
 	const handleAddRecord = async (recordType: RecordType) => {
 		const amount = prompt("양을 입력해주세요");
@@ -189,19 +214,23 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 					{/* 구분선 */}
 					<hr />
 					{/* 참여자 추가 UI */}
-					<label className="label" >
-						참여자
-					</label>
-					<div className="field is-flex is-align-items-center is-justify-content-space-between" style={{ gap: "1rem" }}>
-						<input
-							className="input"
-							type="text"
-							value={attendeeName}
-							onChange={(e) =>
-								setAttendeeName(e.target.value)
-							}
-							placeholder="참여자 이름"
-						/>
+					<label className="label">참여자</label>
+					<div
+						className="field is-flex is-align-items-center is-justify-content-space-between"
+						style={{ gap: "1rem" }}
+					>
+						<div style={{ flex: 1 }}>
+							<Select<OptionType>
+								options={friends}
+								onChange={(selectedOption) => {
+									setAttendeeName(
+										selectedOption?.value || ""
+									);
+								}}
+								placeholder="참여자 이름"
+								isSearchable={true}
+							/>
+						</div>
 						<button
 							className="button is-primary"
 							onClick={handleAddAttendee}

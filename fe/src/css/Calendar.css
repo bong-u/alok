@@ -32,7 +32,6 @@
 }
 
 .react-calendar__tile {
-	height: 4rem;
 	text-align: center;
 	display: flex;
 	flex-direction: column;
@@ -55,10 +54,12 @@
 }
 
 .react-calendar__month-view__days__day.react-calendar__tile {
+	height: 4rem;
 	border-radius: 25%;
 }
 
 .react-calendar__year-view__months__month.react-calendar__tile {
+	height: 5rem;
 	border-radius: 20%;
 	line-height: 0.5;
 }
