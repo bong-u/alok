@@ -1,83 +1,48 @@
 import React, { useState, useEffect } from "react";
-import {
-	LineChart,
-	Line,
-	XAxis,
-	YAxis,
-	CartesianGrid,
-	Tooltip,
-	Legend,
-	ResponsiveContainer,
-} from "recharts";
-import { RecordsByPeriod, RecordTypeInfo } from "../types";
+import { PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts";
+import { AttendeeNameWithCount } from "../types";
 import api from "../api";
 
 const MyStatsPage: React.FC = () => {
-	const [recordsByMonth, setRecordsByMonth] = useState<RecordsByPeriod>({});
+	const [attendeeNameWithCount, setAttendeeNameWithCount] = useState<
+		AttendeeNameWithCount[]
+	>([]);
 
 	useEffect(() => {
-		const fetchRecordsByYear = async (activeStartDate: Date) => {
-			const year = activeStartDate.getFullYear();
-
+		const fetchAttendeeNameWithCount = async () => {
 			try {
-				const response = await api.get<RecordsByPeriod>(
-					`/records/${year}`
-				);
-				setRecordsByMonth(response.data);
+				const response = await api.get("/attendees/stats/soju/count");
+				console.log(response.data);
+				setAttendeeNameWithCount(response.data);
 			} catch (error: any) {
 				sessionStorage.setItem("error", error);
 				window.location.href = "/error";
 			}
 		};
 
-		fetchRecordsByYear(new Date());
+		fetchAttendeeNameWithCount();
 	}, []);
-
-	// 데이터를 그래프용 형식으로 변환
-	const chartData = Object.entries(recordsByMonth).map(([month, records]) => {
-		const dataEntry: any = { month };
-		records.forEach((record) => {
-			dataEntry[record.recordType] = record.amount;
-		});
-		return dataEntry;
-	});
 
 	return (
 		<div className="container box wide">
-			<h2 className="subtitle has-text-centered">월별 통계</h2>
+			<h2 className="subtitle has-text-centered">자주 참여한 인물</h2>
 			<div
 				className="is-flex is-justify-content-center"
-				style={{ height: "200px" }}
+				style={{ height: "250px" }}
 			>
-				<ResponsiveContainer width="100%">
-					<LineChart
-						data={chartData}
-						margin={{ top: 5, right: 30, bottom: 5, left: 0 }}
-					>
-						<CartesianGrid strokeDasharray="3 3" />
-						<XAxis
-							dataKey="month"
-							interval={0}
-							tickFormatter={(month) => {
-								// ex) "2024-10" -> "10월"
-								const [, monthNumber] = month.split("-");
-								return `${parseInt(monthNumber, 10)}월`;
-							}}
+				<ResponsiveContainer width="100%" height="100%">
+					<PieChart>
+						<Pie
+							data={attendeeNameWithCount}
+							dataKey="count"
+							cx="50%"
+							cy="50%"
+							outerRadius={80}
+							fill="#116D6E"
+							label={({ name, value }) => `${name}(${value})`}
 						/>
-						<YAxis width={30} />
 						<Tooltip />
-						<Legend />
-						{Object.entries(RecordTypeInfo).map(
-							([recordType, { korName, color }]) => (
-								<Line
-									key={recordType}
-									dataKey={recordType}
-									stroke={color}
-									name={korName}
-								/>
-							)
-						)}
-					</LineChart>
+					</PieChart>
 				</ResponsiveContainer>
 			</div>
 		</div>

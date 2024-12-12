@@ -1,4 +1,5 @@
-export type RecordType = "soju" | "beer";
+export type RecordType = "soju";
+// | "beer";
 
 export interface Record {
 	recordType: RecordType;
@@ -29,4 +30,9 @@ export interface Attendee {
 export const enum View {
 	MONTH = "month",
 	YEAR = "year",
+}
+
+export interface AttendeeNameWithCount {
+	name: string;
+	count: number;
 }
