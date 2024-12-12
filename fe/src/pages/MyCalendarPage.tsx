@@ -12,13 +12,9 @@ const MyCalendarPage: React.FC = () => {
 	const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
 	const fetchRecords = useCallback(
-		async (activeDate: Date, currentView: View = View.MONTH) => {
-			if (currentView === View.MONTH) {
-				fetchRecordsByMonth(activeDate);
-			}
-			if (currentView === View.YEAR) {
-				fetchRecordsByYear(activeDate);
-			}
+		async (date: Date, currentView: View = View.MONTH) => {
+			if (currentView === View.MONTH) fetchRecordsByMonth(date);
+			if (currentView === View.YEAR) fetchRecordsByYear(date);
 		},
 		[]
 	);
