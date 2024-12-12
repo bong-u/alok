@@ -28,8 +28,8 @@ class AttendeeService {
 			date,
 			partnerUserId
 		);
-		// 해당 date의 참여자가 5명 이상이면 예외 발생
-		if (dateObj.dateAttendees.length >= 5)
+		// 해당 date의 참여자가 10명 이상이면 예외 발생
+		if (dateObj.dateAttendees.length >= 10)
 			throw new AttendeeExceedsMaxError();
 
 		const isAttended = await AttendeeService.isAttended(

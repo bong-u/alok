@@ -41,7 +41,7 @@ export class AttendeeNotFoundError extends Error {
 
 export class AttendeeExceedsMaxError extends Error {
 	constructor() {
-		super("5명 이상의 참여자를 추가할 수 없습니다.");
+		super("참여자는 10명을 넘을 수 없습니다.");
 	}
 }
 
