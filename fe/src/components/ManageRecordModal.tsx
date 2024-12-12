@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { RecordType, Record, RecordTypeInfo, Attendee } from "../types";
 import api from "../api";
-import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
 
 interface OptionType {
 	value: string;
@@ -19,7 +19,6 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 	records = [],
 	onClose,
 }: ManageRecordModalProps) => {
-	const [attendeeName, setAttendeeName] = useState("");
 	const [attendees, setAttendees] = useState<Attendee[]>([]);
 	const [friends, setFriends] = useState<OptionType[]>([]);
 
@@ -98,7 +97,7 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 		onClose();
 	};
 
-	const handleAddAttendee = async () => {
+	const handleAddAttendee = async (attendeeName: string) => {
 		if (!attendeeName) {
 			alert("참여자 이름을 입력해주세요.");
 			return;
@@ -128,7 +127,6 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 		}
 
 		fetchAttendees();
-		setAttendeeName("");
 	};
 
 	const handleRemoveAttendee = async (attendeeName: string) => {
@@ -220,23 +218,23 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 						style={{ gap: "1rem" }}
 					>
 						<div style={{ flex: 1 }}>
-							<Select<OptionType>
+							<CreatableSelect
 								options={friends}
+								onCreateOption={(attendeeName) => {
+									handleAddAttendee(attendeeName);
+								}}
 								onChange={(selectedOption) => {
-									setAttendeeName(
-										selectedOption?.value || ""
+									handleAddAttendee(
+										(selectedOption as OptionType).value
 									);
 								}}
 								placeholder="참여자 이름"
 								isSearchable={true}
+								formatCreateLabel={(inputValue: string) =>
+									`${inputValue} 추가`
+								}
 							/>
 						</div>
-						<button
-							className="button is-primary"
-							onClick={handleAddAttendee}
-						>
-							추가
-						</button>
 					</div>
 					{/* 참여자 목록 */}
 					<div className="tags">
