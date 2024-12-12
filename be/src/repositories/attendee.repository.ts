@@ -137,7 +137,7 @@ class AttendeeRepository {
 		FROM
 			date_attendee da
 		JOIN
-			attendee a ON da.attendee_id = a.id
+			attendee a ON da.attendee_id = a.id AND a.user_id = ${userId}
 		LEFT JOIN
 			relevant_records rr ON rr.date_id = da.date_id
 		GROUP BY
