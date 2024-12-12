@@ -72,11 +72,26 @@ class AttendeeService {
 			DateService.getDateId(date),
 		]);
 
-		// 참여자가 해당 날짜에 참여하지 않았다면 예외 발생
-		if (!AttendeeService.isAttended(attendee.id, dateId))
-			throw new AttendeeNotFoundError();
+		const dateAttendees = await AttendeeRepository.getDateAttendees(
+			attendee.id
+		);
 
-		await AttendeeRepository.deleteAttendeeById(attendee.id);
+		const isAttended = dateAttendees.some(
+			(item) => item.dateId === dateId && item.attendeeId === attendee.id
+		);
+		// 참여자가 해당 날짜에 참여하지 않았다면 예외 발생
+		if (!isAttended) {
+			throw new AttendeeNotFoundError();
+		}
+
+		// 참여자가 다른 기록에 참여하지 않았다면 Attendee 삭제
+		if (dateAttendees.length === 1) {
+			await AttendeeRepository.deleteAttendeeById(attendee.id);
+		}
+		// 참여자가 다른 기록에 참여하고 있다면 참여 기록만 삭제
+		else {
+			await AttendeeRepository.deleteDateAttendee(attendee.id, dateId);
+		}
 	}
 
 	static async getAttendeeByName(

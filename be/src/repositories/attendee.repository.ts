@@ -48,9 +48,7 @@ class AttendeeRepository {
 		});
 	}
 
-	static async getFriends(
-		partnerUserId: number
-	): Promise<AttendeeDTO[]> {
+	static async getFriends(partnerUserId: number): Promise<AttendeeDTO[]> {
 		const attendees = await prisma.attendee.findMany({
 			where: {
 				partnerUserId,
@@ -85,6 +83,23 @@ class AttendeeRepository {
 
 	static async getDateAttendee(attendeeId: number, dateId: number) {
 		return await prisma.dateAttendee.findFirst({
+			where: {
+				attendeeId,
+				dateId,
+			},
+		});
+	}
+
+	static async getDateAttendees(attendeeId: number) {
+		return await prisma.dateAttendee.findMany({
+			where: {
+				attendeeId,
+			},
+		});
+	}
+
+	static async deleteDateAttendee(attendeeId: number, dateId: number) {
+		await prisma.dateAttendee.deleteMany({
 			where: {
 				attendeeId,
 				dateId,
