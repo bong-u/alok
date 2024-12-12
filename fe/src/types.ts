@@ -18,7 +18,7 @@ export const RecordTypeInfo: {
 	[key in RecordType]: { korName: string; unit: string; color: string };
 } = {
 	soju: { korName: "소주", unit: "병", color: "green" },
-	beer: { korName: "맥주", unit: "잔", color: "brown" },
+	// beer: { korName: "맥주", unit: "잔", color: "brown" },
 };
 
 export interface Attendee {
@@ -30,4 +30,3 @@ export const enum View {
 	MONTH = "month",
 	YEAR = "year",
 }
-
