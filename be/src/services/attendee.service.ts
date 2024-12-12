@@ -3,7 +3,7 @@ import {
 	AttendeeExceedsMaxError,
 	AttendeeAlreadyExistsError,
 } from "../exceptions";
-import { AttendeeDTO } from "../types/attendee.types";
+import { AttendeeDTO, AttendeeNameWithCount } from "../types/attendee.types";
 import AttendeeRepository from "../repositories/attendee.repository";
 import DateService from "../services/date.service";
 
@@ -105,6 +105,16 @@ class AttendeeService {
 
 		if (!attendee) throw new AttendeeNotFoundError();
 		return attendee;
+	}
+
+	static async getAttendeeNameWithCount(
+		recordType: string,
+		userId: number
+	): Promise<AttendeeNameWithCount[]> {
+		return (await AttendeeRepository.getAttendeeNameWithCount(
+			recordType,
+			userId
+		)) as AttendeeNameWithCount[];
 	}
 
 	static async isAttended(

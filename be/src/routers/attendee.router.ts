@@ -12,6 +12,7 @@ import {
 	getAttendeeSchema,
 	deleteAttendeeSchema,
 } from "../schemas/attendee.schemas";
+import { recordTypeSchema } from "../schemas/record.schemas";
 
 const attendeeRouter = () => {
 	const router = Router();
@@ -100,6 +101,27 @@ const attendeeRouter = () => {
 				if (err instanceof AttendeeNotFoundError)
 					return res.status(404).send(err.message);
 
+				console.error(err);
+				return res.status(500).send((err as Error).message);
+			}
+		}
+	);
+
+	router.get(
+		"/stats/:recordType/count",
+		validationMiddleware(recordTypeSchema, "params"),
+		async (req: Request, res: Response) => {
+			const recordType = String(req.params.recordType);
+			const userId = Number(req.userId);
+
+			try {
+				const result = await AttendeeService.getAttendeeNameWithCount(
+					recordType,
+					userId
+				);
+
+				return res.status(200).send(result);
+			} catch (err: unknown) {
 				console.error(err);
 				return res.status(500).send((err as Error).message);
 			}

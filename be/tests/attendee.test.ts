@@ -1,7 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import authMiddleware from "../src/middlewares/auth.middleware";
 import express from "express";
-import { describe, beforeAll, beforeEach, afterAll, it, expect } from "@jest/globals";
+import {
+	describe,
+	beforeAll,
+	beforeEach,
+	afterAll,
+	it,
+	expect,
+} from "@jest/globals";
 import request from "supertest";
 import attendeeRouter from "../src/routers/attendee.router";
 import redis from "../src/redis";
@@ -162,6 +169,36 @@ describe("Attendee Router", () => {
 				where: { attendeeId: attendee.id },
 			});
 			expect(dateAttendee).toBeNull();
+		});
+	});
+
+	describe("GET /api/attendees/stats/:recordType/count", () => {
+		it("기록 유형별 참여자 수 조회 - 200", async () => {
+			const user = await TestUtil.createUser();
+			const attendee1 = await TestUtil.createAttendee("김철수", user.id);
+			const attendee2 = await TestUtil.createAttendee("김영희", user.id);
+			const date1 = await TestUtil.createDate("2024-01-01");
+			const date2 = await TestUtil.createDate("2024-01-02");
+
+			await TestUtil.createRecord(date1.id, "soju", 1.0, user.id);
+			await TestUtil.createRecord(date2.id, "soju", 2.0, user.id);
+
+			await TestUtil.connectAttendeeToDate(attendee1.id, date1.id);
+			await TestUtil.connectAttendeeToDate(attendee1.id, date2.id);
+			await TestUtil.connectAttendeeToDate(attendee2.id, date2.id);
+
+			const response = await request(app)
+				.get("/stats/soju/count")
+				.set(
+					"Authorization",
+					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
+				);
+
+			expect(response.status).toBe(200);
+			expect(response.body).toEqual([
+				{ name: "김철수", count: 2 },
+				{ name: "김영희", count: 1 },
+			]);
 		});
 	});
 });

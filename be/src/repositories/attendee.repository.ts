@@ -114,6 +114,39 @@ class AttendeeRepository {
 			},
 		});
 	}
+
+	static async getAttendeeNameWithCount(
+		record_type: string,
+		userId: number,
+		limit: number = 10
+	) {
+		return prisma.$queryRaw`
+		WITH relevant_records AS (
+			SELECT
+				r.date_id,
+				r.record_type
+			FROM
+				record r
+			WHERE
+				r.user_id = ${userId}
+				AND r.record_type = ${record_type}
+		)
+		SELECT
+			a.name AS name,
+			COUNT(da.attendee_id)::INT AS count
+		FROM
+			date_attendee da
+		JOIN
+			attendee a ON da.attendee_id = a.id
+		LEFT JOIN
+			relevant_records rr ON rr.date_id = da.date_id
+		GROUP BY
+			da.attendee_id, a.name, rr.record_type
+		ORDER BY
+			count DESC
+		LIMIT ${limit}
+		`;
+	}
 }
 
 export default AttendeeRepository;

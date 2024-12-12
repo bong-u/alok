@@ -2,6 +2,12 @@ import Joi from "joi";
 
 const recordTypeValues = ["soju", "beer"] as const;
 
+export const recordTypeSchema = Joi.object({
+	recordType: Joi.string()
+		.valid(...recordTypeValues)
+		.required(),
+});
+
 export const getRecordsSchema = Joi.object({
 	year: Joi.number().required(),
 	month: Joi.number(),
