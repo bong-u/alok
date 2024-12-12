@@ -2,10 +2,8 @@ import React from "react";
 import { Calendar } from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "../css/Calendar.css";
-import { RecordsByPeriod } from "../types";
 
 interface MyCalendarProps {
-	records: RecordsByPeriod;
 	tileContent: (args: { date: Date; view: string }) => React.ReactNode;
 	activeStartDate: Date;
 	showNavigation?: boolean;
@@ -19,7 +17,6 @@ interface MyCalendarProps {
 }
 
 const MyCalendar: React.FC<MyCalendarProps> = ({
-	records,
 	tileContent,
 	activeStartDate,
 	showNavigation = true,

@@ -51,7 +51,6 @@ const UserCalendarPage: React.FC = () => {
 			</h1>
 
 			<MyCalendar
-				records={records}
 				tileContent={getTileContent}
 				activeStartDate={activeDate}
 				showNavigation={false}

@@ -140,7 +140,6 @@ const MyCalendarPage: React.FC = () => {
 				/>
 			)}
 			<MyCalendar
-				records={records}
 				tileContent={getTileContent}
 				onClickDay={handleClickDay}
 				activeStartDate={activeDate}
