@@ -14,18 +14,17 @@ class TokenService {
 	}
 
 	static async getUserIdFromToken(token: string): Promise<number> {
-		if (await BlacklistRepository.isExists(token)) {
+		// 토큰이 블랙리스트에 있는지 확인
+		if (await BlacklistRepository.isExists(token))
 			throw new TokenBlacklistedError();
-		}
+
 		return await jwtUtil.getUserIdFromToken(token);
 	}
 
 	static async addToBlacklist(token: string): Promise<void> {
 		const decoded = jwt.decode(token) as { exp?: number } | null;
 
-		if (!decoded || !decoded.exp) {
-			throw new InvalidTokenError();
-		}
+		if (!decoded || !decoded.exp) throw new InvalidTokenError();
 
 		const now = Math.floor(Date.now() / 1000);
 		const expiresIn = decoded.exp - now;

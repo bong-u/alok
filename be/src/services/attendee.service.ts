@@ -13,21 +13,22 @@ class AttendeeService {
 		attendeeName: string,
 		partnerUserId: number
 	): Promise<AttendeeDTO> {
-		let attendee = null;
-		attendee = await AttendeeRepository.getAttendeeByName(
-			attendeeName,
-			partnerUserId
-		);
-		if (!attendee)
-			attendee = await AttendeeRepository.createAttendee(
+		// 참여자를 조회 ,없으면 생성
+		const attendee =
+			(await AttendeeRepository.getAttendeeByName(
 				attendeeName,
 				partnerUserId
-			);
+			)) ??
+			(await AttendeeRepository.createAttendee(
+				attendeeName,
+				partnerUserId
+			));
 
 		const dateObj = await DateService.getDateAndAttendees(
 			date,
 			partnerUserId
 		);
+		// 해당 date의 참여자가 5명 이상이면 예외 발생
 		if (dateObj.dateAttendees.length >= 5)
 			throw new AttendeeExceedsMaxError();
 
@@ -35,8 +36,10 @@ class AttendeeService {
 			attendee.id,
 			dateObj.id
 		);
+		// 이미 참여한 참여자인 경우 예외 발생
 		if (isAttended) throw new AttendeeAlreadyExistsError();
 
+		// 참여자와 날짜를 연결
 		await AttendeeRepository.connectAttendeeToDate(attendee.id, dateObj.id);
 
 		return attendee;
@@ -63,18 +66,20 @@ class AttendeeService {
 		attendeeName: string,
 		userId: number
 	): Promise<void> {
+		// 참여자와 날짜를 조회
 		const [attendee, dateId] = await Promise.all([
 			AttendeeService.getAttendeeByName(attendeeName, userId),
 			DateService.getDateId(date),
 		]);
 
+		// 참여자가 해당 날짜에 참여하지 않았다면 예외 발생
 		if (!AttendeeService.isAttended(attendee.id, dateId))
 			throw new AttendeeNotFoundError();
 
 		await AttendeeRepository.deleteAttendeeById(attendee.id);
 	}
 
-	private static async getAttendeeByName(
+	static async getAttendeeByName(
 		name: string,
 		partnerUserId: number
 	): Promise<AttendeeDTO> {
@@ -86,7 +91,8 @@ class AttendeeService {
 		if (!attendee) throw new AttendeeNotFoundError();
 		return attendee;
 	}
-	private static async isAttended(
+
+	static async isAttended(
 		attendeeId: number,
 		dateId: number
 	): Promise<boolean> {

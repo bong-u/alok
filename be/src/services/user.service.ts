@@ -15,9 +15,8 @@ const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS || "10");
 class UserService {
 	static async getUserById(userId: number): Promise<UserDTO> {
 		const user = await UserRepository.getUserById(userId);
-		if (!user) {
-			throw new UserNotFoundError();
-		}
+		if (!user) throw new UserNotFoundError();
+
 		return user;
 	}
 
@@ -30,9 +29,8 @@ class UserService {
 		password: string
 	): Promise<TokenResponse> {
 		const user = await UserRepository.getUserByUsername(username);
-		if (!user || !bcrypt.compareSync(password, user.password)) {
+		if (!user || !bcrypt.compareSync(password, user.password))
 			throw new UserAuthenticationFailedError();
-		}
 
 		return {
 			accessToken: TokenService.generateAccessToken(user.id),
@@ -45,9 +43,8 @@ class UserService {
 		password: string
 	): Promise<void> {
 		const user = await UserRepository.getUserById(userId);
-		if (!user || !bcrypt.compareSync(password, user.password)) {
+		if (!user || !bcrypt.compareSync(password, user.password))
 			throw new UserAuthenticationFailedError();
-		}
 	}
 
 	static async userSignup(
@@ -70,14 +67,14 @@ class UserService {
 			}
 		);
 		const verificationReuslt = await response.json();
-
-		if (verificationReuslt.score <= 0.5) {
+	
+		// recaptcha 검증 점수가 기준 미달인 경우
+		if (verificationReuslt.score <= 0.5)
 			throw new RecaptchaScoreTooLowError();
-		}
-
-		if (!verificationReuslt.success) {
+		
+		// recaptcha 검증 실패인 경우
+		if (!verificationReuslt.success)
 			throw new RecaptchaTokenInvalidError();
-		}
 	}
 
 	static async createUser(
@@ -85,9 +82,9 @@ class UserService {
 		password: string
 	): Promise<number> {
 		const existingUser = await UserRepository.getUserByUsername(username);
-		if (existingUser) {
+		// 동일한 username을 가진 사용자가 이미 존재하는 경우
+		if (existingUser)
 			throw new UserAlreadyExistsError();
-		}
 
 		const hashedPassword = bcrypt.hashSync(password, SALT_ROUNDS);
 		return (await UserRepository.createUser(username, hashedPassword)).id;
@@ -123,8 +120,11 @@ class UserService {
 		refreshToken: string,
 		userId: number
 	): Promise<void> {
-		await UserService.addTokensToBlacklist(accessToken, refreshToken);
+		// 해당 userId를 가진 사용자가 존재하는지 확인
 		await UserService.getUserById(userId);
+		// 토큰을 블랙리스트에 추가
+		await UserService.addTokensToBlacklist(accessToken, refreshToken);
+		// 사용자 삭제
 		await UserRepository.deleteUser(userId);
 	}
 }

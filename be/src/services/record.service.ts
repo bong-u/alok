@@ -25,10 +25,9 @@ class RecordService {
 		);
 		// 결과를 날짜별로 그룹화하여 반환
 		const groupedRecords = records.reduce((acc, record) => {
-			const dateKey = record.date.date; // `date.date`는 "YYYY-MM-DD" 형식
-			if (!acc[dateKey]) {
-				acc[dateKey] = [];
-			}
+			const dateKey = record.date.date; // "YYYY-MM-DD" 형식
+			if (!acc[dateKey]) acc[dateKey] = [];
+
 			acc[dateKey].push({
 				recordType: record.recordType,
 				amount: record.amount,
@@ -52,9 +51,8 @@ class RecordService {
 				{ month, recordType, amount }: MonthlyRecord
 			) => {
 				const monthKey = `${year}-${month}`; // "YYYY-MM" 형식
-				if (!acc[monthKey]) {
-					acc[monthKey] = [];
-				}
+				if (!acc[monthKey]) acc[monthKey] = [];
+
 				acc[monthKey].push({ recordType, amount });
 				return acc;
 			},
@@ -141,16 +139,14 @@ class RecordService {
 			userId
 		);
 
+		// 해당 date에 record가 없는 경우
 		if (!recordId) throw new RecordNotFoundError();
 
 		// 해당 date의 마지막 record인 경우 date 삭제 -> record 삭제 (cascade)
-		if (dateObj.records.length === 1) {
+		if (dateObj.records.length === 1)
 			await DateService.deleteDateById(dateObj.id);
-		}
 		// record만 삭제
-		else {
-			await RecordRepository.deleteRecordById(recordId);
-		}
+		else await RecordRepository.deleteRecordById(recordId);
 	}
 }
 
