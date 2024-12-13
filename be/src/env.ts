@@ -1,9 +1,8 @@
 import { execSync } from "child_process";
 import dotenv from "dotenv";
-import { PrismaClient } from "@prisma/client";
+import prisma from "./prisma";
 
 const resetDatabase = async () => {
-	const prisma = new PrismaClient();
 	await prisma.$executeRawUnsafe(
 		`TRUNCATE TABLE member, date RESTART IDENTITY CASCADE;`
 	);

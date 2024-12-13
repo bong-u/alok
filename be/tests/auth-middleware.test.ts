@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../src/prisma";
 import redis from "../src/redis";
 import {
 	describe,
@@ -13,8 +13,6 @@ import express from "express";
 import recordRouter from "../src/routers/record.router";
 import authMiddleware from "../src/middlewares/auth.middleware";
 import jwtUtil from "../src/utils/jwt.util";
-
-const prisma = new PrismaClient();
 
 describe("Record Router", () => {
 	let app: express.Application;

@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../prisma";
 import { AttendeeDTO } from "../types/attendee.types";
-
-const prisma = new PrismaClient();
 
 class AttendeeRepository {
 	static async createAttendee(

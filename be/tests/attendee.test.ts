@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../src/prisma";
 import authMiddleware from "../src/middlewares/auth.middleware";
 import express from "express";
 import {
@@ -14,8 +14,6 @@ import attendeeRouter from "../src/routers/attendee.router";
 import redis from "../src/redis";
 import JwtUtil from "../src/utils/jwt.util";
 import TestUtil from "../src/utils/test.util";
-
-const prisma = new PrismaClient();
 
 describe("Attendee Router", () => {
 	let app: express.Application;

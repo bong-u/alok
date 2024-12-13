@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../src/prisma";
 import redis from "../src/redis";
 import { describe, it, expect, afterAll } from "@jest/globals";
-
-const prisma = new PrismaClient();
 
 describe("Database Connection", () => {
 	afterAll(async () => {

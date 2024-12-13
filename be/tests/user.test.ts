@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../src/prisma";
 import request from "supertest";
 import {
 	describe,
@@ -14,7 +14,6 @@ import redis from "../src/redis";
 import TokenService from "../src/services/token.service";
 import TestUtil from "../src/utils/test.util";
 
-const prisma = new PrismaClient();
 const TEST_RECAPTCHA_TOKEN = "test";
 
 describe("User Router", () => {

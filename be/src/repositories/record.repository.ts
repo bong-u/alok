@@ -1,7 +1,6 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import prisma from "../prisma";
 import { RecordWithDate, MonthlyRecord } from "../types/record.types";
-
-const prisma = new PrismaClient();
 
 class RecordRepository {
 	static async getRecordsByMonth(

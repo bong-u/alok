@@ -1,7 +1,6 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import prisma from "../prisma";
 import { DateDTO, DateAndRecords, DateAndAttendees } from "../types/date.types";
-
-const prisma = new PrismaClient();
 
 class DateRepository {
 	static async createDate(

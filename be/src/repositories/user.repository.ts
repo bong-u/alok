@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../prisma";
 import { UserDTO, UserDTOWithPassword } from "../types/user.types";
-
-const prisma = new PrismaClient();
 
 class UserRepository {
 	static async getUserByUsername(

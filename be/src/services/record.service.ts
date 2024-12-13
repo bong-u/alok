@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../prisma";
 import {
 	RecordDTO,
 	MonthlyRecord,
@@ -9,8 +9,6 @@ import RecordRepository from "../repositories/record.repository";
 import UserService from "../services/user.service";
 import DateService from "../services/date.service";
 import DateRepository from "../repositories/date.repository";
-
-const prisma = new PrismaClient();
 
 class RecordService {
 	static async getRecordsGroupedByDay(
