@@ -14,7 +14,7 @@ export const getRecordsSchema = Joi.object({
 	userId: Joi.number(),
 });
 
-export const deleteRecordRequestSchema = Joi.object({
+export const updateOrDeleteRecordSchema = Joi.object({
 	date: Joi.string().isoDate().required(),
 	recordType: Joi.string()
 		.valid(...recordTypeValues)

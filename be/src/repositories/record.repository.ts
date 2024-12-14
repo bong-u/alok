@@ -89,6 +89,20 @@ class RecordRepository {
 		});
 	}
 
+	static async updateRecordAmount(
+		recordId: number,
+		amount: number
+	): Promise<void> {
+		await prisma.record.update({
+			where: {
+				id: recordId,
+			},
+			data: {
+				amount: amount,
+			},
+		});
+	}
+
 	static async deleteRecordById(recordId: number): Promise<void> {
 		await prisma.record.delete({
 			where: {

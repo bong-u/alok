@@ -2,7 +2,7 @@ import { Request, Router, Response } from "express";
 import {
 	recordSchema,
 	getRecordsSchema,
-	deleteRecordRequestSchema,
+	updateOrDeleteRecordSchema
 } from "../schemas/record.schemas";
 import RecordService from "../services/record.service";
 import UserService from "../services/user.service";
@@ -110,9 +110,39 @@ const recordRouter = () => {
 		}
 	);
 
+	router.patch(
+		"/:date/:recordType",
+		validationMiddleware(updateOrDeleteRecordSchema, "params"),
+		async (req: Request, res: Response) => {
+			const date = String(req.params.date);
+			const recordType = String(req.params.recordType);
+			const userId = Number(req.userId);
+			const { amount } = req.body;
+
+			try {
+				await RecordService.updateRecordAmount(
+					date,
+					recordType,
+					amount,
+					userId
+				);
+				return res.status(200).send("Record updated successfully");
+			} catch (err: unknown) {
+				if (
+					err instanceof DateNotFoundError ||
+					err instanceof RecordNotFoundError
+				)
+					return res.status(404).send(err.message);
+
+				console.error(err);
+				return res.status(500).send((err as Error).message);
+			}
+		}
+	);
+
 	router.delete(
 		"/:date/:recordType",
-		validationMiddleware(deleteRecordRequestSchema, "params"),
+		validationMiddleware(updateOrDeleteRecordSchema, "params"),
 		async (req: Request, res: Response) => {
 			const date = String(req.params.date);
 			const recordType = String(req.params.recordType);

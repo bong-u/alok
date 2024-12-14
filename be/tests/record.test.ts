@@ -191,6 +191,54 @@ describe("Record Router", () => {
 		});
 	});
 
+	describe("PATCH /api/records/:date/:recordType", () => {
+		it("record 수정 - 200", async () => {
+			const user = await TestUtil.createUser();
+			const dateId = (await TestUtil.createDate("2024-01-01")).id;
+			const recordId = (
+				await TestUtil.createRecord(dateId, "soju", 3.5, user.id)
+			).id;
+
+			const res = await request(app)
+				.patch("/2024-01-01/soju")
+				.send({ amount: 4 })
+				.set(
+					"Authorization",
+					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
+				);
+			expect(res.status).toBe(200);
+
+			const recordObj = await prisma.record.findUnique({
+				where: { id: recordId },
+			});
+			expect(recordObj?.amount).toBe(4);
+		});
+
+		it("잘못된 형식의 데이터 - 400", async () => {
+			const user = await TestUtil.createUser();
+			const res = await request(app)
+				.patch("/2024-01-01/soj")
+				.send({ amount: "7" })
+				.set(
+					"Authorization",
+					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
+				);
+			expect(res.status).toBe(400);
+		});
+
+		it("존재하지 않는 데이터 - 404", async () => {
+			const user = await TestUtil.createUser();
+			const res = await request(app)
+				.patch("/2024-01-01/soju")
+				.send({ amount: 5.5 })
+				.set(
+					"Authorization",
+					`Bearer ${JwtUtil.generateAccessToken(user.id)}`
+				);
+			expect(res.status).toBe(404);
+		});
+	});
+
 	describe("DELETE /api/records/:date/:recordType", () => {
 		it("record 삭제 (date도 삭제) - 200", async () => {
 			const user = await TestUtil.createUser();

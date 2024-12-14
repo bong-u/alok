@@ -117,12 +117,18 @@ class RecordService {
 		});
 	}
 
-	static async deleteRecordById(recordId: number): Promise<void> {
-		await prisma.record.delete({
-			where: {
-				id: recordId,
-			},
-		});
+	static async updateRecordAmount(date: string, recordType: string, amount: number, userId: number): Promise<void> {
+		const dateObj = await DateService.getDateAndRecords(date, userId);
+		const recordId = await RecordRepository.getRecordIdByDateAndType(
+			dateObj.id,
+			recordType,
+			userId
+		);
+
+		// 해당 date에 record가 없는 경우
+		if (!recordId) throw new RecordNotFoundError();
+
+		RecordRepository.updateRecordAmount(recordId, amount);
 	}
 
 	static async deleteRecord(
