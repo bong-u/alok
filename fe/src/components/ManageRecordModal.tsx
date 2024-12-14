@@ -152,7 +152,7 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 			style={{ padding: "15px" }}
 		>
 			<div className="modal-background" onClick={onClose}></div>
-			<section className="modal-card">
+			<section className="modal-card" style={{ height: "80%" }}>
 				<header className="modal-card-head">
 					<p className="modal-card-title has-text-centered">
 						{selectedDate}
@@ -254,7 +254,7 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 					</div>
 				</section>
 			</section>
-		</div>
+		</div >
 	);
 };
 
