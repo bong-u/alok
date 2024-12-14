@@ -129,6 +129,26 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 		fetchAttendees();
 	};
 
+	const handleUpdateRecord = async (recordType: RecordType) => {
+		const amount = prompt("수정할 양을 입력해주세요");
+		if (!amount) return;
+		if (![0.5, 1, 1.5, 2, 2.5, 3, 4, 5].includes(Number(amount))) {
+			alert("잘못된 양입니다.");
+			return;
+		}
+
+		try {
+			const response = await api.patch(`/records/${selectedDate}/${recordType}`, {
+				amount: Number(amount),
+			});
+			console.info(response.data);
+		} catch (error: any) {
+			sessionStorage.setItem("error", error);
+			window.location.href = "/error";
+		}
+		onClose();
+	}
+
 	const handleRemoveAttendee = async (attendeeName: string) => {
 		if (!window.confirm(`${attendeeName} 참여자를 삭제하시겠습니까?`))
 			return;
@@ -182,16 +202,28 @@ const ManageRecordModal: React.FC<ManageRecordModalProps> = ({
 									</label>
 									<div className="control">
 										{amount ? (
-											<button
-												className="button is-danger"
-												onClick={() =>
-													handleRemoveRecord(
-														recordType as RecordType
-													)
-												}
-											>
-												삭제
-											</button>
+											<div className="is-flex" style={{ gap: "1rem" }}>
+												<button
+													className="button is-info"
+													onClick={() =>
+														handleUpdateRecord(
+															recordType as RecordType
+														)
+													}
+												>
+													수정
+												</button>
+												<button
+													className="button is-danger"
+													onClick={() =>
+														handleRemoveRecord(
+															recordType as RecordType
+														)
+													}
+												>
+													삭제
+												</button>
+											</div>
 										) : (
 											<button
 												className="button is-primary"
