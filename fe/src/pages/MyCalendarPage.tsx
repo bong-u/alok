@@ -82,7 +82,8 @@ const MyCalendarPage: React.FC = () => {
 
 	// 터치 종료 시 스와이프 감지
 	const handleTouchEnd = (e: React.TouchEvent) => {
-		if (touchStartX === null) return;
+		// 터치 시작 X 좌표가 없거나 모달이 열린 경우 무시
+		if (touchStartX === null || selectedDate) return;
 
 		const touchEndX = e.changedTouches[0].clientX;
 		const deltaX = touchStartX - touchEndX;
